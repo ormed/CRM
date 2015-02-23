@@ -1,16 +1,13 @@
-<?php //include_once 'connection/checkUser.php';?>
+<?php include_once 'connection/checkUser.php';?>
 <?php
-
-if(isset($_SESSION['user']) && isset($_SESSION['password'])) {
-	header("Location: blank.php");
-}
-
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-	if (isset($_POST['order-date']))
-		echo $_POST['order-date'];
-
+	if (isset($_POST['order-date'])) {
+		list($year, $month, $day) = preg_split('[\-]', $_POST['order-date'], -1, PREG_SPLIT_NO_EMPTY);
+		echo $day."/".$month."/".$year;
+		
+	}
 } 
 else {
 ?>
@@ -26,10 +23,7 @@ else {
         <div id="page-wrapper">
         
             <div class="container-fluid">
-            
-            
-            
-            
+
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="page-header">Add Order</h1>
@@ -54,16 +48,24 @@ else {
                                        		</div>
 			  							</div>
 			  							
+			  							<?php 
+                                        		$q = 'Select * from customers';
+                                        		$db = new Database();
+                                        		$results = $db->createQuery($q);
+                                        		?>
+                                        		
                                         <div class="form-group">
-                                            <i class="fa fa-user"></i> <label>Customer Id</label>
-                                            <input class="form-control" style="width:200px" placeholder="Enter id">
+                                            <i class="fa fa-user"></i> <label>Customer</label>
+                                            <select name="desc1" class="form-control" style="width:200px">
+                                            			<?php foreach ($results as $result) { ?>
+                                                <option>	<?php echo($result["CUST_ID"]." ".$result["FIRST_NAME"]." ".$result["LAST_NAME"]);?></option>
+                                            			<?php } ?>
+                                           	</select>
                                         </div>
                                         
                                         <div class="form-group">
                                         	<i class="fa fa-cubes"></i> <label>Items</label>
-                                        	
-                                        	
-                                        	                                        		
+                                        	                     		
                                         		<?php 
                                         		$q = 'Select * from products';
                                         		$db = new Database();
@@ -128,7 +130,7 @@ else {
     <!-- /#wrapper -->
 <script>
 function addItemToDiv(i) {
-	if(i > 3) {
+	if(i > 5) {
 		document.getElementById("no-more-error").innerHTML = "<div class='alert alert-danger'>Can't add more than 5 items in one order!</div></div>";
 		document.getElementById("plus-items").className = "btn btn-danger btn-xs";
 	} else {
@@ -137,8 +139,8 @@ function addItemToDiv(i) {
 }
 </script>
 <!-- <script type="text/javascript" src="order.js"></script> -->
-<?php include_once 'parts/bottom.php';?>
-
-<?php include_once 'parts/footer.php'; 
+<?php 
+include_once 'parts/bottom.php';
+include_once 'parts/footer.php'; 
 } 
 ?>

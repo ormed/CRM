@@ -34,4 +34,9 @@ class Database {
 		}
 		return $result;
 	}
+	
+	public function parseQuery($q) {
+		$stid = oci_parse($this->_dbh, $q);
+		return $stid;
+	}
 }

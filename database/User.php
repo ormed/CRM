@@ -10,13 +10,13 @@ class User {
     public static function testSignIn() {
         $err = '';
         if ((empty($_POST['username'])) || (empty($_POST['password']))) {
-            $err = "Please fill in all the form";
+            $err = "Please fill in all the fields";
         } else {
             $user = cleanInput($_POST['username']);
             $result = User::getUser($user);
             //if user was not found in database -> create new user
             if ($result) {
-                $hash = $result[0]['password'];
+                $hash = $result[0]['PASSWORD'];
                 $password = $_POST['password'];
                 //before insert the new user check if password match
                 if (!password_verify($password, $hash)) {
@@ -35,13 +35,9 @@ class User {
      */
     public static function testSignUp() {
         $err = '';
-        if ((empty($_POST['first_name'])) || (empty($_POST['last_name'])) || (empty($_POST['user'])) || (empty($_POST['email'])) || (empty($_POST['pass']))) {
-            $err = "Please fill in all the form";
+        if ((empty($_POST['first_name'])) || (empty($_POST['last_name'])) || (empty($_POST['user'])) || (empty($_POST['pass']))) {
+            $err = "Please fill in all the fields";
         } else {
-            $email_exp = '/^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/';
-            if (!preg_match($email_exp, $_POST['email'])) {
-                $err = 'The Email Address you entered does not appear to be valid.';
-            }
             $string_exp = "/^[A-Za-z .'-]+$/";
             if (!preg_match($string_exp, $_POST['first_name'])) {
                 $err = 'The First Name you entered does not appear to be valid.';
@@ -53,44 +49,66 @@ class User {
             $result = User::getUser($user);
             //if user was not found in database -> create new user
             if (!$result) {
-                $string = strtoupper($_SESSION['string']);
+                $string = strtoupper($_SESSION['string']); 
                 $userstring = strtoupper($_POST['userstring']);
                 //before insert the new user check if password match
                 if ($_POST['pass'] != $_POST['cpass']) {
                     $err = "Password does not match!";
                 } elseif (($string != $userstring) || (strlen($string) <= 4)) {
                     $err = "Please enter the code in the image again";
-                } else {
-                    User::newUser();
-                }
+                } 
             } else {
-                $err = "SORRY...YOU ARE ALREADY REGISTERED USER...";
+                $err = "User is already registered...";
             }
         }
         return $err;
+    }
+    
+    /*
+     * function to check if edit form was submitted ok
+     * return errors if found any
+     */
+    public static function testEdit() {
+    	$err = '';
+    	if ((empty($_POST['first_name'])) || (empty($_POST['last_name']))) {
+    		$err = "Please fill in all the fields";
+    	} else {
+    		$string_exp = "/^[A-Za-z .'-]+$/";
+    		if (!preg_match($string_exp, $_POST['first_name'])) {
+    			$err = 'The First Name you entered does not appear to be valid.';
+    		}
+    		if (!preg_match($string_exp, $_POST['last_name'])) {
+    			$err = 'The Last Name you entered does not appear to be valid.';
+    		}
+    	}
+    	return $err;
     }
 
     /**
      * get user params from post
      */
     public static function newUser() {
-        $firstName = cleanInput($_POST['first_name']);
-        $lastName = cleanInput($_POST['last_name']);
-        $userName = cleanInput($_POST['user']);
-        $email = cleanInput($_POST['email']);
+        $first_name = cleanInput($_POST['first_name']);
+        $last_name = cleanInput($_POST['last_name']);
+        $username = cleanInput($_POST['user']);
         $password = password_hash($_POST['pass'], PASSWORD_BCRYPT);
-        User::insertUser($userName, $password, $email, $firstName, $lastName);
-
+        
+        return User::insertUser($username, $password, $first_name, $last_name);
     }
 
     /**
      * update a new user to database
      */
-    public static function insertUser($user, $password, $email, $first_name, $last_name) {
+    public static function insertUser($user, $password, $first_name, $last_name) {
         $db = new Database();
-        $q = "INSERT INTO `users` (`id`,`email`, `username`, `password`, `first_name`, `last_name`) VALUES
-             (NULL, '{$email}','{$user}','{$password}','{$first_name}','{$last_name}');";
-        $db->createQuery($q);
+        $q = "INSERT INTO USERS(USERNAME, PASSWORD, FIRST_NAME, LAST_NAME) VALUES (:user, :pass, :first_name, :last_name)";
+        $stid = $db->parseQuery($q);
+        oci_bind_by_name($stid, ':user', $user);
+        oci_bind_by_name($stid, ':pass', $password);
+        oci_bind_by_name($stid, ':first_name', $first_name);
+        oci_bind_by_name($stid, ':last_name', $last_name);
+        $r = oci_execute($stid);  // executes and commits
+        return $r;
     }
 
     /**
@@ -109,10 +127,19 @@ class User {
         }
     }
     
-    public static function updateLogo($url, $user) {
+    /**
+     * update user
+     * @param - $user->user to update, $first_name, $last_name
+     */
+    public static function updateUser($user, $first_name, $last_name) {
     	$db = new Database();
-    	$q = "UPDATE `wix_for_poor`.`users` SET `logo` = '{$url}' WHERE `users`.`username` = '{$user}';";
-    	$db->createQuery($q);
+    	$q = "UPDATE users SET first_name = :cfirst, last_name = :clast WHERE username = :cuser";
+    	$stid = $db->parseQuery($q);
+    	
+    	oci_bind_by_name($stid, ':cuser', $user);
+        oci_bind_by_name($stid, ':cfirst', $first_name);
+        oci_bind_by_name($stid, ':clast', $last_name);
+        $r = oci_execute($stid);  // executes and commits
+        return $r;
     }
-
 }

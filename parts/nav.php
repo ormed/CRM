@@ -18,12 +18,12 @@
                         <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-user">
-                        <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                        <li><a href="user_info.php"><i class="fa fa-user fa-fw"></i> User Profile</a>
                         </li>
                         <li><a href="#"><i class="fa fa-usd fa-fw"></i> My Sellings</a>
                         </li>
                         <li class="divider"></li>
-                        <li><a href="login.php"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        <li><a href="logout.php"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                         </li>
                     </ul>
                     <!-- /.dropdown-user -->
@@ -42,11 +42,17 @@
                                     <a href="blank.php">Blank Page</a>
                                 </li>
                                 <li>
+                                    <a href="index.php">Lobby</a>
+                                </li>
+                                <li>
                                     <a href="login.php">Login Page</a>
                                 </li>
                                 <?php //if(user->permissions == "worker") {?>
                                 <li>
                                     <a href="order.php">Orders Page</a>
+                                </li>
+                                <li>
+                                    <a href="customer.php">Add Customer</a>
                                 </li>
                                 <?php //} ?>
                             </ul>

@@ -1,4 +1,4 @@
-<?php //include_once 'connection/validator.php';?>
+<?php include_once 'connection/checkUser.php';?>
 
 <?php include_once 'parts/header.php';?>
 
@@ -23,7 +23,6 @@
 					<!-- /.col-lg-12 -->
 				</div>
 				<!-- /.row -->
-				<button type="button" class="btn btn-primary">Primary</button>
 
 				<div class="panel panel-default">
 					<div class="panel-heading">Customers</div>
@@ -34,46 +33,25 @@
 								<thead>
 
 									<tr>
-										<th>Description</th>
-										<th>Price</th>
+										<th>Customer Id</th>
+										<th>First Name</th>
+										<th>Last Name</th>
 									</tr>
 								</thead>
 								<tbody>
-                                    
-                                    
-                                    
-                                    <?php /*
-                                        $results = array(array("name" => 'Yossi', "age"  => 15), array("name" => 'Itzik', "age"  => 30), array("name" => 'Avi', "age"  => 20));
-                                        
-                                        debug($results, true);
-                                        
-                                        foreach ($results as $result) {
-                                        ?>
-                                        
-                                        <tr>
-                                            <td><?php echo($result["name"]); ?></td>
-                                            <td><?php echo($result["age"])?></td>
-                                        </tr>
-                                        
-                                        <?php 
-                                        } 
-                                        */?>
-                                        
-                                        
                                         <?php 
                                         
-                                        $q = 'Select * from products';
+                                        $q = "Select * from customers";
                                         $db = new Database();
                                         $results = $db->createQuery($q);
-                                        
-                                        debug($results);
-                                                     
+
                                         foreach ($results as $result) {
                                         	?>
                                                                                 
                                     		<tr>
-												<td><?php echo($result["DESCRIPTION"]); ?></td>
-												<td><?php echo($result["WH_ID"])?></td>
+												<td><?php echo($result["CUST_ID"]); ?></td>
+												<td><?php echo($result["FIRST_NAME"])?></td>
+												<td><?php echo($result["LAST_NAME"])?></td>
 											</tr>
 										<?php 
                                         } 
@@ -90,8 +68,96 @@
 					<!-- /.panel-body -->
 				</div>
 
+				<div class="panel panel-default">
+					<div class="panel-heading">Users</div>
+					<!-- /.panel-heading -->
+					<div class="panel-body">
+						<div class="table-responsive">
+							<table class="table table-striped table-bordered table-hover">
+								<thead>
 
+									<tr>
+										<th>User Id</th>
+										<th>Username</th>
+										<th>Password</th>
+										<th>First Name</th>
+										<th>Last Name</th>
+									</tr>
+								</thead>
+								<tbody>
+                                        <?php 
+                                        
+                                        $q = "Select * from users";
+                                        $db = new Database();
+                                        $results = $db->createQuery($q);
+                                                     
+                                        foreach ($results as $result) {
+                                        	?>
+                                                                                
+                                    		<tr>
+												<td><?php echo($result["USER_ID"]); ?></td>
+												<td><?php echo($result["USERNAME"]); ?></td>
+												<td><?php echo($result["PASSWORD"]); ?></td>
+												<td><?php echo($result["FIRST_NAME"])?></td>
+												<td><?php echo($result["LAST_NAME"])?></td>
+											</tr>
+										<?php 
+                                        } 
 
+                                        ?>
+                                        
+                                        
+                                        
+                                    </tbody>
+							</table>
+						</div>
+						<!-- /.table-responsive -->
+					</div>
+					<!-- /.panel-body -->
+				</div>
+
+				<div class="panel panel-default">
+					<div class="panel-heading">Products</div>
+					<!-- /.panel-heading -->
+					<div class="panel-body">
+						<div class="table-responsive">
+							<table class="table table-striped table-bordered table-hover">
+								<thead>
+
+									<tr>
+										<th>P Id</th>
+										<th>Description</th>
+									</tr>
+								</thead>
+								<tbody>
+                                        <?php 
+                                        
+                                        $q = "Select * from products";
+                                        $db = new Database();
+                                        $results = $db->createQuery($q);
+                                        debug($results);
+                                        
+                                        foreach ($results as $result) {
+                                        	?>
+                                                                                
+                                    		<tr>
+												<td><?php echo($result["P_ID"]); ?></td>
+												<td><?php echo($result["DESCRIPTION"])?></td>
+											</tr>
+										<?php 
+                                        } 
+
+                                        ?>
+                                        
+                                        
+                                        
+                                    </tbody>
+							</table>
+						</div>
+						<!-- /.table-responsive -->
+					</div>
+					<!-- /.panel-body -->
+				</div>
 
 
 			</div>
