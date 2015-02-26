@@ -74,8 +74,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
                                             <input class="form-control" name="last_name">
                                         </div>
 
-                                        <button type="submit" class="btn btn-default">Submit Button</button>
-                                        <button type="reset" class="btn btn-default">Reset Button</button>
+                                        <button type="submit" class="btn btn-default">New Customer</button>
+                                        <button type="reset" class="btn btn-default">Reset</button>
                                     </form>
                                 </div>
                             </div>

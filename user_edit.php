@@ -15,13 +15,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 if (($_SERVER["REQUEST_METHOD"] == "POST") && empty($err)) {
 	User::updateUser($_SESSION["user"], $_POST["first_name"], $_POST["last_name"]);
+	header('Location: user_info.php');
 } else {
 ?>
 
 <body>
 
     <div id="wrapper">
-
         <?php include_once 'parts/nav.php';?>
 
         <!-- Page Content -->
@@ -64,11 +64,11 @@ if (($_SERVER["REQUEST_METHOD"] == "POST") && empty($err)) {
                                         </div>
                                         <div class="form-group">
                                             <label>First Name</label>
-                                            <input class="form-control" name="first_name" type="text" placeholder="<?php echo $results[0]["FIRST_NAME"];?>">
+                                            <input class="form-control" name="first_name" type="text" value="<?php echo $results[0]["FIRST_NAME"];?>">
                                         </div>
                                         <div class="form-group">
                                             <label>Last Name</label>
-                                            <input class="form-control" name="last_name" type="text" placeholder="<?php echo $results[0]["LAST_NAME"];?>">
+                                            <input class="form-control" name="last_name" type="text" value="<?php echo $results[0]["LAST_NAME"];?>">
                                         </div>
 
                                         <button type="submit" class="btn btn-default">Save</button>

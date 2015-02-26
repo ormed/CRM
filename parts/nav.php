@@ -47,14 +47,15 @@
                                 <li>
                                     <a href="login.php">Login Page</a>
                                 </li>
-                                <?php //if(user->permissions == "worker") {?>
                                 <li>
                                     <a href="order.php">Orders Page</a>
                                 </li>
                                 <li>
                                     <a href="customer.php">Add Customer</a>
                                 </li>
-                                <?php //} ?>
+                                <li>
+                                    <a href="product.php">Add Product</a>
+                                </li>
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>

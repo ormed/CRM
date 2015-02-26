@@ -1,17 +1,24 @@
-<?php include_once 'connection/checkUser.php';?>
-<?php
+<?php 
+include_once 'connection/checkUser.php';
+include_once 'database/Order.php';
+include_once 'help_functions.php';
+
+
+$err = '';
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-	if (isset($_POST['order-date'])) {
-		list($year, $month, $day) = preg_split('[\-]', $_POST['order-date'], -1, PREG_SPLIT_NO_EMPTY);
-		echo $day."/".$month."/".$year;
-		
-	}
+	//list($year, $month, $day) = preg_split('[\-]', $_POST['order-date'], -1, PREG_SPLIT_NO_EMPTY);
+	//$order_date = $day."/".$month."/".$year;
+	$err = Order::testOrderForm();
 } 
-else {
-?>
-<?php include_once 'parts/header.php';?>
+
+//if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
+	
+//}
+//else {
+
+include_once 'parts/header.php';?>
 
 <body>
 
@@ -41,6 +48,13 @@ else {
                                 <div class="col-lg-6">
                                     <form role="form" id="order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
                                     
+                                    <?php if(!empty($err)) { ?>
+                                    	<div class="alert alert-danger" role="alert">
+                                    	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                    		<?php echo $err?>
+                                    	</div> 
+                                    	<?php }?>
+                                    	
                                     <div class="form-group">
                                             <i class="fa fa-calendar"></i> <label>Date</label> 
                                         	<div>
@@ -56,7 +70,7 @@ else {
                                         		
                                         <div class="form-group">
                                             <i class="fa fa-user"></i> <label>Customer</label>
-                                            <select name="desc1" class="form-control" style="width:200px">
+                                            <select name="customer" class="form-control" style="width:200px">
                                             			<?php foreach ($results as $result) { ?>
                                                 <option>	<?php echo($result["CUST_ID"]." ".$result["FIRST_NAME"]." ".$result["LAST_NAME"]);?></option>
                                             			<?php } ?>
@@ -134,7 +148,7 @@ function addItemToDiv(i) {
 		document.getElementById("no-more-error").innerHTML = "<div class='alert alert-danger'>Can't add more than 5 items in one order!</div></div>";
 		document.getElementById("plus-items").className = "btn btn-danger btn-xs";
 	} else {
-		document.getElementById("more-items").innerHTML += "<div><i class='fa fa-cube'></i> <label>Item #"+i+"</label></div><div>Description:<select name='desc'"+i+" class='form-control' style='width:200px'><?php foreach ($results as $result) { ?><option><?php echo($result["DESCRIPTION"]);?></option><?php }?></select></div><div>Quantity:<input name='quantity'"+i+" class='form-control' style='width:200px' placeholder='Quantity' maxlength='2' onkeypress='return event.charCode >= 48 && event.charCode <= 57'></div>";
+		document.getElementById("more-items").innerHTML += "<div><i class='fa fa-cube'></i> <label>Item #"+i+"</label></div><div>Description:<select name='desc"+i+"' class='form-control' style='width:200px'><?php foreach ($results as $result) { ?><option><?php echo($result["DESCRIPTION"]);?></option><?php }?></select></div><div>Quantity:<input name='quantity"+i+"' class='form-control' style='width:200px' placeholder='Quantity' maxlength='2' onkeypress='return event.charCode >= 48 && event.charCode <= 57'></div>";
 	}
 }
 </script>
@@ -142,5 +156,5 @@ function addItemToDiv(i) {
 <?php 
 include_once 'parts/bottom.php';
 include_once 'parts/footer.php'; 
-} 
+//} 
 ?>
