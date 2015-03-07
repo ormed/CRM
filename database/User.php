@@ -101,12 +101,12 @@ class User {
      */
     public static function insertUser($user, $password, $first_name, $last_name) {
         $db = new Database();
-        $q = "INSERT INTO USERS(USERNAME, PASSWORD, FIRST_NAME, LAST_NAME) VALUES (:user, :pass, :first_name, :last_name)";
+        $q = "INSERT INTO USERS(USERNAME, PASSWORD, FIRST_NAME, LAST_NAME) VALUES (:cuser, :cpass, :cfirst_name, :clast_name)";
         $stid = $db->parseQuery($q);
-        oci_bind_by_name($stid, ':user', $user);
-        oci_bind_by_name($stid, ':pass', $password);
-        oci_bind_by_name($stid, ':first_name', $first_name);
-        oci_bind_by_name($stid, ':last_name', $last_name);
+        oci_bind_by_name($stid, ':cuser', $user);
+        oci_bind_by_name($stid, ':cpass', $password);
+        oci_bind_by_name($stid, ':cfirst_name', $first_name);
+        oci_bind_by_name($stid, ':clast_name', $last_name);
         $r = oci_execute($stid);  // executes and commits
         return $r;
     }

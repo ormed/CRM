@@ -132,7 +132,7 @@
 								<tbody>
                                         <?php 
                                         
-                                        $q = "Select * from products";
+                                        $q = "select * from products;";
                                         $db = new Database();
                                         $results = $db->createQuery($q);
                                         debug($results);
@@ -143,9 +143,10 @@
                                     		<tr>
 												<td><?php echo($result["P_ID"]); ?></td>
 												<td><?php echo($result["DESCRIPTION"])?></td>
+												<td><?php //echo($result["QUANTITY"])?></td>
 											</tr>
 										<?php 
-                                        } 
+                                        }
 
                                         ?>
                                         
