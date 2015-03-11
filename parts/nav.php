@@ -36,7 +36,7 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="#"><i class="fa fa-files-o fa-fw"></i> Sample Pages<span class="fa arrow"></span></a>
+                            <a href="#"><i class="fa fa-files-o fa-fw"></i> Menu<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li>
                                     <a href="blank.php">Blank Page</a>
@@ -55,6 +55,9 @@
                                 </li>
                                 <li>
                                     <a href="product.php">Add Product</a>
+                                </li>
+                                <li>
+                                    <a href="all_orders.php">All orders</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

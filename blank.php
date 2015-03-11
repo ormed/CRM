@@ -1,6 +1,7 @@
-<?php //include_once 'connection/validator.php';?>
-
-<?php include_once 'parts/header.php';?>
+<?php 
+include_once 'connection/checkUser.php';
+include_once 'parts/header.php';
+?>
 
 <body>
 
