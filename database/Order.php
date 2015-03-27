@@ -39,7 +39,7 @@ class Order {
     
     public static function getOrderRows($order_id) {
     	$db = new Database();
-    	$q = "Select p.description, p.price, r.quantity, (P.PRICE*R.QUANTITY) as Total from orders_rows r, products p where r.p_id = p.p_id and r.order_id = '{$order_id}'";
+    	$q = "Select p.p_id, p.description, p.price, r.quantity, (P.PRICE*R.QUANTITY) as Total from orders_rows r, products p where r.p_id = p.p_id and r.order_id = '{$order_id}'";
     	$result = $db->createQuery($q);
     	if (count($result) > 0) {
     		return $result;
