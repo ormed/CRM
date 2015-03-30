@@ -8,15 +8,14 @@ $err = '';
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-	//list($year, $month, $day) = preg_split('[\-]', $_POST['order-date'], -1, PREG_SPLIT_NO_EMPTY);
-	//$order_date = $day."/".$month."/".$year;
 	$err = Order::testOrderForm();
 } 
 
-//if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
-	
-//}
-//else {
+if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
+	Order::insertNewOrder();
+	//header("Location: all_orders.php");
+}
+else {
 
 include_once 'parts/header.php';?>
 
@@ -114,7 +113,7 @@ include_once 'parts/header.php';?>
                                         </div>
                                         <div class="form-group">
                                             <i class="fa fa-unlock-alt"></i> <label>Status</label>
-                                            <select class="form-control" style="width:200px">
+                                            <select name="status" class="form-control" style="width:200px">
                                                 <option>Open</option>
                                                 <option>Close</option>
                                             </select>
@@ -157,4 +156,5 @@ function addItemToDiv(i) {
 include_once 'parts/bottom.php';
 include_once 'parts/footer.php'; 
 //} 
+}
 ?>

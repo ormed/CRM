@@ -1,6 +1,7 @@
-<?php include_once 'connection/checkUser.php';?>
-
-<?php include_once 'parts/header.php';?>
+<?php 
+include_once 'connection/checkUser.php';
+include_once 'parts/header.php';
+?>
 
 <body>
 
@@ -41,7 +42,7 @@
 								<tbody>
                                         <?php 
                                         
-                                        $q = "Select * from customers";
+                                        $q = "select * from customers";
                                         $db = new Database();
                                         $results = $db->createQuery($q);
 
@@ -79,7 +80,6 @@
 									<tr>
 										<th>User Id</th>
 										<th>Username</th>
-										<th>Password</th>
 										<th>First Name</th>
 										<th>Last Name</th>
 									</tr>
@@ -87,7 +87,7 @@
 								<tbody>
                                         <?php 
                                         
-                                        $q = "Select * from users";
+                                        $q = "select * from users";
                                         $db = new Database();
                                         $results = $db->createQuery($q);
                                                      
@@ -97,7 +97,6 @@
                                     		<tr>
 												<td><?php echo($result["USER_ID"]); ?></td>
 												<td><?php echo($result["USERNAME"]); ?></td>
-												<td><?php echo($result["PASSWORD"]); ?></td>
 												<td><?php echo($result["FIRST_NAME"])?></td>
 												<td><?php echo($result["LAST_NAME"])?></td>
 											</tr>
@@ -123,19 +122,18 @@
 						<div class="table-responsive">
 							<table class="table table-striped table-bordered table-hover">
 								<thead>
-
 									<tr>
-										<th>P Id</th>
+										<th>Product Id</th>
 										<th>Description</th>
+										<th>Price</th>
 									</tr>
 								</thead>
 								<tbody>
                                         <?php 
                                         
-                                        $q = "select * from products;";
+                                        $q = "select * from products";
                                         $db = new Database();
                                         $results = $db->createQuery($q);
-                                        debug($results);
                                         
                                         foreach ($results as $result) {
                                         	?>
@@ -143,7 +141,7 @@
                                     		<tr>
 												<td><?php echo($result["P_ID"]); ?></td>
 												<td><?php echo($result["DESCRIPTION"])?></td>
-												<td><?php //echo($result["QUANTITY"])?></td>
+												<td><?php echo($result["PRICE"])?></td>
 											</tr>
 										<?php 
                                         }

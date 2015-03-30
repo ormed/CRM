@@ -12,7 +12,7 @@ class Customer {
      */
     public static function getCustomer($id) {
         $db = new Database();
-        $q = "SELECT * FROM customers WHERE cust_id='{$id}'";
+        $q = "select * FROM customers WHERE cust_id='{$id}'";
         $result = $db->createQuery($q);
         if (count($result) > 0) {
             return $result;
@@ -23,14 +23,13 @@ class Customer {
 
     /**
      * insert new customer details
-     * @param $first_name, $last_name
      */
-    public static function insertCustomer($first_name, $last_name) {
+    public static function insertCustomer() {
         $db = new Database();
-        $q = "INSERT INTO customers(FIRST_NAME, LAST_NAME) VALUES (:cfirst_name, :clast_name)";
+        $q = "insert into customers(FIRST_NAME, LAST_NAME) values (:cfirst_name, :clast_name)";
         $stid = $db->parseQuery($q);
-        oci_bind_by_name($stid, ':cfirst_name', $first_name);
-        oci_bind_by_name($stid, ':clast_name', $last_name);
+        oci_bind_by_name($stid, ':cfirst_name', $_POST['first_name']);
+        oci_bind_by_name($stid, ':clast_name', $_POST['last_name']);
         $r = oci_execute($stid);  // executes and commits
         return $r;
     }

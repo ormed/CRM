@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$err = Customer::testNewCustomer();
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
-	$result = Customer::insertCustomer($_POST['first_name'], $_POST['last_name']); //insert new customer
+	$result = Customer::insertCustomer(); //insert new customer
 	if($result) {
 		// Popup added customer succesfully
 		$message = "Added New Customer: ". $_POST['first_name']." ".$_POST['last_name'];

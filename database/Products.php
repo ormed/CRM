@@ -25,8 +25,6 @@ class Products {
         $product = Products::getProductId($_POST['desc']);
         $prod_id = $product[0]['P_ID'];
         
-        debug($prod_id);
-        
         $q2 = "INSERT INTO INVENTORY(P_ID, QUANTITY) VALUES (:p_id, :quantity)";
         $stid2 = $db->parseQuery($q2);
         oci_bind_by_name($stid2, ':p_id', $prod_id);
