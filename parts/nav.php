@@ -36,19 +36,19 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="#"><i class="fa fa-files-o fa-fw"></i> Menu<span class="fa arrow"></span></a>
+                            <a href="#"><i class="fa fa-wrench fa-fw"></i> Menu<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="blank.php">Blank Page</a>
-                                </li>
+<!--                                 <li> -->
+<!--                                     <a href="blank.php">Blank Page</a> -->
+<!--                                 </li> -->
                                 <li>
                                     <a href="index.php">Lobby</a>
                                 </li>
+<!--                                 <li> -->
+<!--                                     <a href="login.php">Login Page</a> -->
+<!--                                 </li> -->
                                 <li>
-                                    <a href="login.php">Login Page</a>
-                                </li>
-                                <li>
-                                    <a href="order.php">Orders Page</a>
+                                    <a href="order.php">Add Order</a>
                                 </li>
                                 <li>
                                     <a href="customer.php">Add Customer</a>

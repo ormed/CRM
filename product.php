@@ -19,10 +19,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
 		$url = "index.php";
 	} else {
 		// Error on insert
-		$message = "Error adding new customer...";
+		$message = "Error adding new product...";
 		$url = "product.php";
 	}
-	//echo "<script> alert('$message'); window.location.href='$url';</script>";
+	echo "<script> alert('$message'); window.location.href='$url';</script>";
 } else {
 ?>
 
@@ -38,9 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
         <div id="page-wrapper">
         
             <div class="container-fluid">
-            
-            
-            
             
                 <div class="row">
                     <div class="col-lg-12">
@@ -71,8 +68,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
                                             <input class="form-control" name="desc" placeholder="Product Description">
                                         </div>
                                         <div class="form-group">
+                                            <i class="fa fa-usd"></i> <label>Price</label>
+                                            <input class="form-control" name="price" placeholder="Price" maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
+                                        </div>
+                                        <div class="form-group">
                                             <i class="fa fa-cubes"></i> <label>Quantity</label>
-                                            <input class="form-control" name="quantity" placeholder="Quantity" maxlength="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                            <input class="form-control" name="quantity" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                                         </div>
 
                                         <button type="submit" class="btn btn-default">New Product</button>

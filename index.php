@@ -157,6 +157,47 @@ include_once 'parts/header.php';
 					</div>
 					<!-- /.panel-body -->
 				</div>
+				
+				<div class="panel panel-default">
+					<div class="panel-heading">Inventory</div>
+					<!-- /.panel-heading -->
+					<div class="panel-body">
+						<div class="table-responsive">
+							<table class="table table-striped table-bordered table-hover">
+								<thead>
+									<tr>
+										<th>Product Id</th>
+										<th>Quantity</th>
+									</tr>
+								</thead>
+								<tbody>
+                                        <?php 
+                                        
+                                        $q = "select * from inventory";
+                                        $db = new Database();
+                                        $results = $db->createQuery($q);
+                                        
+                                        foreach ($results as $result) {
+                                        	?>
+                                                                                
+                                    		<tr>
+												<td><?php echo($result["P_ID"]); ?></td>
+												<td><?php echo($result["QUANTITY"])?></td>
+											</tr>
+										<?php 
+                                        }
+
+                                        ?>
+                                        
+                                        
+                                        
+                                    </tbody>
+							</table>
+						</div>
+						<!-- /.table-responsive -->
+					</div>
+					<!-- /.panel-body -->
+				</div>
 
 
 			</div>

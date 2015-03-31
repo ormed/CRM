@@ -76,7 +76,7 @@ class Order {
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':corder_id', $order_id);
     	oci_bind_by_name($stid, ':crow_num', $index);
-    	$p_id = Products::getProductId($_POST['desc'.$index])[0]['P_ID'];
+    	$p_id = Products::getProductId($_POST['desc'.$index]);
     	oci_bind_by_name($stid, ':cp_id', $p_id);
     	oci_bind_by_name($stid, ':cquantity', $_POST['quantity'.$index]);
     	$r = oci_execute($stid);  // executes and commits

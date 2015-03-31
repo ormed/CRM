@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
 	Order::insertNewOrder();
-	//header("Location: all_orders.php");
+	header("Location: all_orders.php");
 }
 else {
 
@@ -40,7 +40,7 @@ include_once 'parts/header.php';?>
                 
                 <div class="panel panel-default">
                         <div class="panel-heading">
-                            Order form
+                            New Order
                         </div>
                         <div class="panel-body">
                             <div class="row">

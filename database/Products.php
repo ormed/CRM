@@ -1,6 +1,9 @@
 <?php
 @session_start();
 
+include_once 'database/Database.php';
+include_once 'database/Inventory.php';
+
 class Products {
 
     /*
@@ -9,37 +12,47 @@ class Products {
      */
     public static function testNewProduct() {
         $err = '';
-        if ((empty($_POST['desc'])) || (empty($_POST['quantity']))) {
+        if ((empty($_POST['desc'])) || (empty($_POST['price'])) || (empty($_POST['quantity']))) {
             $err = "Please fill in all the fields";
         }
         return $err;
     }
     
+    public static function getProduct($desc) {
+    	$db = new Database();
+    	$q = "SELECT * FROM products WHERE description='{$desc}'";
+    	$result = $db->createQuery($q);
+    	if (count($result) > 0) {
+    		return $result;
+    	} else {
+    		return FALSE;
+    	}
+    }
+    
+    /*
+     * insert new product
+     * return FALSE if any error in inserting
+     */
     public static function insertProduct() {
     	$db = new Database();
-        $q = "INSERT INTO PRODUCTS(DESCRIPTION) VALUES (:cdesc)";
-        $stid = $db->parseQuery($q);
-        oci_bind_by_name($stid, ':cdesc', $_POST['desc']);
-        $r = oci_execute($stid);  // executes and commits
-        
-        $product = Products::getProductId($_POST['desc']);
-        $prod_id = $product[0]['P_ID'];
-        
-        $q2 = "INSERT INTO INVENTORY(P_ID, QUANTITY) VALUES (:p_id, :quantity)";
-        $stid2 = $db->parseQuery($q2);
-        oci_bind_by_name($stid2, ':p_id', $prod_id);
-        oci_bind_by_name($stid2, ':quantity', $_POST['quantity']);
-        $p = oci_execute($stid2);  // executes and commits
-        
-        return $r;
+    	$q = "merge into products d using (SELECT :cdesc description, :cprice price from dual) s ON (d.description = s.description) WHEN MATCHED THEN UPDATE SET d.price = s.price WHEN NOT MATCHED THEN INSERT (description, price) VALUES (s.description, s.price)";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':cdesc', $_POST['desc']);
+    	oci_bind_by_name($stid, ':cprice', $_POST['price']);
+    	$r = oci_execute($stid);  // executes and commits
+    	
+    	// Update inventory
+    	$product = Products::getProductId($_POST['desc']);
+    	$inv = Inventory::insertToInventory($product, $_POST['quantity']);
+    	return $r*$inv; // if something goes wrong returns FALSE
     }
     
     public static function getProductId($desc) {
     	$db = new Database();
-    	$q = "SELECT p_id FROM products WHERE description='{$desc}'";
+    	$q = "select p_id from products where description='{$desc}'";
     	$result = $db->createQuery($q);
     	if (count($result) > 0) {
-    		return $result;
+    		return $result[0]['P_ID'];
     	} else {
     		return FALSE;
     	}
