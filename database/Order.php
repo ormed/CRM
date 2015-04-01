@@ -119,26 +119,26 @@ class Order {
     			$row_num = $product_row[0]['ROW_NUM'];
     			if($_POST['quantity_'.$i] == 0) { // Delete row
     				$q = "delete from orders_rows where (order_id = :corder_id and row_num = :crow_num)";
+    				$stid = $db->parseQuery($q);
     				oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
     				oci_bind_by_name($stid, ':crow_num', $row_num);
-    				$db->createQuery($q); // delete row
+    				oci_execute($stid); // delete row
     			} else { // Update quantity
     				$q = "update orders_rows set quantity = :cquantity where (row_num = :crow_num and order_id = :corder_id)";
     				$stid = $db->parseQuery($q);
     				oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
     				oci_bind_by_name($stid, ':crow_num', $row_num);
     				oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
-    				$r = oci_execute($stid);  // executes and commits
-    				debug($r);
+    				oci_execute($stid);  // executes and commits
     			}
     		} else { // Doesn't exist - create row
     			$q = "insert into orders_rows(ORDER_ID, ROW_NUM, P_ID, QUANTITY) values (:corder_id, :crow_num, :cp_id, :cquantity)";
     			$stid = $db->parseQuery($q);
     			oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
-    			oci_bind_by_name($stid, ':crow_num', $last_row);
-    			$p_id = Products::getProductId($_POST['desc'.$index]);
-    			oci_bind_by_name($stid, ':cp_id', $p_id);
-    			oci_bind_by_name($stid, ':cquantity', $_POST['quantity'.$index]);
+    			$new_row = $last_row + 1;
+    			oci_bind_by_name($stid, ':crow_num', $new_row);
+    			oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
+    			oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
     			oci_execute($stid);  // executes and commits
     		}
     		$i++;
