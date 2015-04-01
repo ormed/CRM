@@ -135,7 +135,6 @@ class User {
     	$db = new Database();
     	$q = "UPDATE users SET first_name = :cfirst, last_name = :clast WHERE username = :cuser";
     	$stid = $db->parseQuery($q);
-    	
     	oci_bind_by_name($stid, ':cuser', $user);
         oci_bind_by_name($stid, ':cfirst', $first_name);
         oci_bind_by_name($stid, ':clast', $last_name);

@@ -1,26 +1,34 @@
 <?php 
-include_once 'connection/checkUser.php';
-include_once 'parts/header.php';
 include_once 'database/Order.php';
 include_once 'database/Customer.php';
 include_once 'database/Inventory.php';
 include_once 'database/Invoice.php';
 
+include_once 'connection/checkUser.php';
+include_once 'parts/header.php';
+
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$result = Order::editOrder();
-	if(strcmp($_POST['status'], 'Close') == 0) {
-		//$result = Invoice::insertInvoice();
-		$url = "invoice.php?order_id=".$_POST['order_id']; // Create Invoice
+	if($result) {
+		if(strcmp($_POST['status'], "Close")) {
+			//$result = Invoice::insertInvoice();
+			$url = "invoice.php?order_id=".$_POST['order_id']; // Create Invoice
+		} else {
+			$url = "all_orders.php"; // Return to all orders
+		}
+		$success = "Order saved!";
 	} else {
-		$url = "all_orders.php"; // Return to all orders
+		$success = "Error! Please try again!";
+		$url = "edit_order.php?order_id=".$_POST['order_id'];
 	}
-	header("Location: ".$url);
+	echo "<script> alert('$success'); window.location.href='$url';</script>";
 }
 
 if (!isset($_GET['order_id'])) {
 	header("Location: all_orders.php");
-} else {
+}
+
 $order_id = $_GET['order_id'];
 $order = Order::getOrderHeader($order_id);
 $rows = Order::getOrderRows($order_id);
@@ -29,17 +37,25 @@ $order_date = Order::getOrderDate($order_id);
 $total = Order::getTotal($order_id)[0]['TOTAL'];
 $status = $order[0]['STATUS'];
 if (!$order || strcmp($status, "Close") == 0) {
-	header("Location: all_orders.php");
+	//header("Location: all_orders.php");
 }	
 
 ?>
 
 <body>
+
     <div id="wrapper">
+
         <?php include_once 'parts/nav.php';?>
+
         <!-- Page Content -->
         <div id="page-wrapper">
+        
             <div class="container-fluid">
+            
+            
+            
+            
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="page-header">Edit Order</h1>
@@ -118,7 +134,7 @@ if (!$order || strcmp($status, "Close") == 0) {
                                     <td><button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button> <?php echo $row['DESCRIPTION']?></td>
                                     <td id="price_<?php echo $index?>" class="text-center" >$<?php echo $row['PRICE']?></td>
                                     <td class="text-center">
-                                    	 <button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
+                                    	<button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
                                     	 <span id='quantity_<?php echo $index?>'><?php echo $row['QUANTITY']?></span> 
                                     	 <button type="button" class="btn btn-success btn-xs" onclick="increase(<?php echo $index.",".$max_quantity?>);"><i class="fa fa-plus"></i></button>
                                     	 <input type="hidden" id='hidden_quantity_<?php echo $index?>' name='quantity_<?php echo $index?>' value='<?php echo $row['QUANTITY']?>'>
@@ -140,22 +156,6 @@ if (!$order || strcmp($status, "Close") == 0) {
                                 </tr>
                             </tbody>
                         </table>
-                        
-                        <div> <!-- Add new product to order -->
-                        	<?php 
-                            	$q = 'Select * from products';
-                              	$db = new Database();
-                         		$results = $db->createQuery($q);
-                            ?>
-                            <button type="button" class="btn btn-success btn-xs" onclick="addProduct(<?php echo $index?>);"><i class="fa fa-plus"></i> Add Product </button>
-                            <select name="new_product_desc" class="form-control" style="width:200px">
-                            <?php foreach ($results as $result) { ?>
-                            <option><?php echo($result["DESCRIPTION"]);?></option>
-                            <?php } ?>
-                            </select>
-                            <input name="new_product_quantity" class="form-control" style="width:200px" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                        </div>
-                        
                     </div>
                 </div>
             </div>
@@ -163,11 +163,16 @@ if (!$order || strcmp($status, "Close") == 0) {
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
     <input type=button onClick="location.href='all_orders.php'" class="btn btn-default" value='Cancel'>
-    </form>   
+    
+    
+    </form>
+                         
+                
             </div>
             <!-- /.container-fluid -->
         </div>
         <!-- /#page-wrapper -->
+
     </div>
     </div>
     <!-- /#wrapper -->
@@ -185,14 +190,6 @@ function deleteItem(index)
 	document.getElementById("total").innerHTML = "$" + new_total;
 	// Decrease the hidden total
 	document.getElementById("hidden_order_total").value = new_total;
-	// Decrease the hidden quantity
-	document.getElementById("hidden_quantity_"+index).value = 0;
-	document.getElementById("hidden_total_"+index).value = 0;
-}
-
-function addProduct(index) 
-{
-	document.getElementById("new_product").innerHTML = "Test";
 }
 
 function increase(index, max_quantity)
@@ -249,5 +246,5 @@ function decrease(index)
 <?php 
 include_once 'parts/bottom.php';
 include_once 'parts/footer.php';
-}
+
 ?>

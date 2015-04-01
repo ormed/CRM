@@ -35,7 +35,6 @@ class Order {
     	$headerResult = Order::insertHeader();
     	if($headerResult) { // Added new header
     		$order_id = Order::getLastAdded()[0]['LAST'];
-    		debug($order_id);
     		$i = 1;
     		while(isset($_POST['desc'.$i])) { // Insert new rows to the new header
      			$rowResult = Order::insertRow($i, $order_id);
@@ -44,7 +43,6 @@ class Order {
     	} else { // Error in adding new header
     		return FALSE;
     	}
-
     }
     
     /*
@@ -97,9 +95,34 @@ class Order {
     	}
     }
     
+    /*
+     * Update the order
+     */
+    public static function editOrder() {
+    	$db = new Database();
+    	$q = "update orders_header set status= :cstatus where order_id= :corder_id";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':cstatus', $_POST['status']);
+    	oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
+    	oci_execute($stid);  // executes and commits
+    	
+    	// Update Rows
+    	$i = 0;
+    	while(isset($_POST['quantity_'.$i])) {
+    		$row_num = $i+1;
+    		$q = "update orders_rows set quantity= :cquantity where (order_id= :corder_id and row_num= :crow_num)";
+    		$stid = $db->parseQuery($q);
+    		oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
+    		oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
+    		oci_bind_by_name($stid, ':crow_num', $row_num);
+    		oci_execute($stid);  // executes and commits
+    		$i++;
+    	}	
+    }
+    
     public static function getOrderHeader($order_id) {
     	$db = new Database();
-    	$q = "select * from orders_header where order_id = '{$order_id}'";
+    	$q = "select * from orders_header where order_id='{$order_id}'";
     	$result = $db->createQuery($q);
     	if (count($result) > 0) {
     		return $result;
