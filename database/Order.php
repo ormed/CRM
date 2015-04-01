@@ -100,22 +100,47 @@ class Order {
      */
     public static function editOrder() {
     	$db = new Database();
+    	// Update Header
     	$q = "update orders_header set status= :cstatus where order_id= :corder_id";
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':cstatus', $_POST['status']);
     	oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
     	oci_execute($stid);  // executes and commits
-    	
     	// Update Rows
     	$i = 0;
     	while(isset($_POST['quantity_'.$i])) {
-    		$row_num = $i+1;
-    		$q = "update orders_rows set quantity= :cquantity where (order_id= :corder_id and row_num= :crow_num)";
-    		$stid = $db->parseQuery($q);
-    		oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
-    		oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
-    		oci_bind_by_name($stid, ':crow_num', $row_num);
-    		oci_execute($stid);  // executes and commits
+    		$q = "select max(row_num) as last from orders_rows r, products p where (r.p_id = p.p_id and r.order_id = '{$_POST['order_id']}')";
+    		$last_row = $db->createQuery($q)[0]['LAST'];
+
+    		$q = "select * from orders_rows r, products p where (r.p_id = p.p_id and r.order_id = '{$_POST['order_id']}' and r.p_id='{$_POST['p_id_'.$i]}')";
+    		$product_row = $db->createQuery($q);
+    		
+    		if(count($product_row) > 0) { // Exist product
+    			$row_num = $product_row[0]['ROW_NUM'];
+    			if($_POST['quantity_'.$i] == 0) { // Delete row
+    				$q = "delete from orders_rows where (order_id = :corder_id and row_num = :crow_num)";
+    				oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
+    				oci_bind_by_name($stid, ':crow_num', $row_num);
+    				$db->createQuery($q); // delete row
+    			} else { // Update quantity
+    				$q = "update orders_rows set quantity = :cquantity where (row_num = :crow_num and order_id = :corder_id)";
+    				$stid = $db->parseQuery($q);
+    				oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
+    				oci_bind_by_name($stid, ':crow_num', $row_num);
+    				oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
+    				$r = oci_execute($stid);  // executes and commits
+    				debug($r);
+    			}
+    		} else { // Doesn't exist - create row
+    			$q = "insert into orders_rows(ORDER_ID, ROW_NUM, P_ID, QUANTITY) values (:corder_id, :crow_num, :cp_id, :cquantity)";
+    			$stid = $db->parseQuery($q);
+    			oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
+    			oci_bind_by_name($stid, ':crow_num', $last_row);
+    			$p_id = Products::getProductId($_POST['desc'.$index]);
+    			oci_bind_by_name($stid, ':cp_id', $p_id);
+    			oci_bind_by_name($stid, ':cquantity', $_POST['quantity'.$index]);
+    			oci_execute($stid);  // executes and commits
+    		}
     		$i++;
     	}	
     }

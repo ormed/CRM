@@ -62,7 +62,7 @@ include_once 'parts/header.php';?>
 			  							</div>
 			  							
 			  							<?php 
-                                        		$q = 'Select * from customers';
+                                        		$q = 'select * from customers';
                                         		$db = new Database();
                                         		$results = $db->createQuery($q);
                                         		?>
@@ -80,7 +80,7 @@ include_once 'parts/header.php';?>
                                         	<i class="fa fa-cubes"></i> <label>Items</label>
                                         	                     		
                                         		<?php 
-                                        		$q = 'Select * from products';
+                                        		$q = 'select * from products';
                                         		$db = new Database();
                                         		$results = $db->createQuery($q);
                                         		?>

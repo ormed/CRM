@@ -57,4 +57,15 @@ class Products {
     		return FALSE;
     	}
     }
+    
+    public static function getProductMaxQuantity($desc) {
+    	$db = new Database();
+    	$q = "select quantity from (select p.p_id, p.description, p.price, i.quantity from products p, inventory i where p.p_id = i.p_id order by p.p_id) where description='{$desc}'";
+    	$result = $db->createQuery($q);
+    	if (count($result) > 0) {
+    		return $result[0]['QUANTITY'];
+    	} else {
+    		return FALSE;
+    	}
+    }
 }

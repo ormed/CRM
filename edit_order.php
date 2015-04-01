@@ -21,16 +21,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (!isset($_GET['order_id'])) {
 	header("Location: all_orders.php");
 } else {
-$order_id = $_GET['order_id'];
-$order = Order::getOrderHeader($order_id);
-$rows = Order::getOrderRows($order_id);
-$cust = Customer::getCustomer($order[0]['CUST_ID']);
-$order_date = Order::getOrderDate($order_id);	
-$total = Order::getTotal($order_id)[0]['TOTAL'];
-$status = $order[0]['STATUS'];
-if (!$order || strcmp($status, "Close") == 0) {
-	header("Location: all_orders.php");
-}	
+	$order_id = $_GET['order_id'];
+	$order = Order::getOrderHeader($order_id);
+	$rows = Order::getOrderRows($order_id);
+	$cust = Customer::getCustomer($order[0]['CUST_ID']);
+	$order_date = Order::getOrderDate($order_id);	
+	$total = Order::getTotal($order_id)[0]['TOTAL'];
+	$status = $order[0]['STATUS'];
+	if (!$order || strcmp($status, "Close") == 0) {
+		header("Location: all_orders.php");
+	}	
 
 ?>
 
@@ -109,13 +109,17 @@ if (!$order || strcmp($status, "Close") == 0) {
                                     <td class="text-right"><strong>Total</strong></td>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="data_table">
                                 <?php if($rows)
                                 	foreach ($rows as $index=>$row) { 
                                 		$max_quantity = Inventory::getMaxQuantity($row['P_ID']);
                                 	?>
                                 <tr id="content_<?php echo $index?>">
-                                    <td><button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button> <?php echo $row['DESCRIPTION']?></td>
+                                    <td>
+                                    	<button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button> 
+                                    	<?php echo $row['DESCRIPTION']?>
+                                    	<input type="hidden" id='hidden_p_id_<?php echo $index?>' name='p_id_<?php echo $index?>' value='<?php echo $row['P_ID']?>'>
+                                    </td>
                                     <td id="price_<?php echo $index?>" class="text-center" >$<?php echo $row['PRICE']?></td>
                                     <td class="text-center">
                                     	 <button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
@@ -143,19 +147,21 @@ if (!$order || strcmp($status, "Close") == 0) {
                         
                         <div> <!-- Add new product to order -->
                         	<?php 
-                            	$q = 'Select * from products';
+                            	$q = 'select * from products order by description';
                               	$db = new Database();
                          		$results = $db->createQuery($q);
                             ?>
-                            <button type="button" class="btn btn-success btn-xs" onclick="addProduct(<?php echo $index?>);"><i class="fa fa-plus"></i> Add Product </button>
-                            <select name="new_product_desc" class="form-control" style="width:200px">
+                            <button type="button" class="btn btn-success btn-xs" onclick="addProduct();"><i class="fa fa-plus"></i> Add Product </button>
+                            <select id="new_product_desc" name="new_product" class="form-control" style="width:200px">
                             <?php foreach ($results as $result) { ?>
-                            <option><?php echo($result["DESCRIPTION"]);?></option>
+                            <option><?php echo($result["P_ID"].". ".$result["DESCRIPTION"]." $".$result["PRICE"]." (".Products::getProductMaxQuantity($result["DESCRIPTION"]).")");?></option>
                             <?php } ?>
                             </select>
-                            <input name="new_product_quantity" class="form-control" style="width:200px" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                            <input id="new_product_quantity" class="form-control" style="width:200px" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                            <div class="alert alert-danger" id="danger_div" style="visibility: hidden">
+                            	<span id="err"></span>
+                            </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
@@ -190,9 +196,61 @@ function deleteItem(index)
 	document.getElementById("hidden_total_"+index).value = 0;
 }
 
-function addProduct(index) 
+function addProduct() 
 {
-	document.getElementById("new_product").innerHTML = "Test";
+	var quantity = document.getElementById("new_product_quantity");
+	if(quantity.value.localeCompare("") == 0) {
+		document.getElementById("err").innerHTML = "<i class='fa fa-info-circle'></i> Must add quantity...";
+		document.getElementById("danger_div").style.visibility = "visible";
+		return;
+	}
+	document.getElementById("danger_div").style.visibility = "hidden"; // Clear errors
+
+	var new_product = document.getElementById("new_product_desc");
+	var max_quantity = ((new_product.value.split("$")[1]).split("(")[1]).split(")")[0];
+	
+	if(parseInt(max_quantity) < quantity.value) {
+		document.getElementById("err").innerHTML = "<i class='fa fa-info-circle'></i> Maximum is " + max_quantity + "!";
+		document.getElementById("danger_div").style.visibility = "visible";
+		return;
+	}
+	
+	var table = document.getElementById("data_table");
+	var table_rows = table.getElementsByTagName("tr").length;
+	var index = table_rows-1;
+    var row = table.insertRow(index);
+    row.id = "content_" + index;
+    // set new description
+    var new_desc = row.insertCell(0);
+    // set new price
+    var new_price = row.insertCell(1);
+    new_price.id = "price_"+index;
+    new_price.className="text-center";
+    // set new quantity
+    var new_quantity = row.insertCell(2);
+    new_quantity.className="text-center";
+    // set new total 
+    var new_total = row.insertCell(3);
+    new_total.className="text-right";
+
+    // get new product id
+    var new_product_id = parseInt((new_product.value.split("$")[0]).split(" ")[0]);
+    
+    // Put the new product details in the html
+    var new_product = document.getElementById("new_product_desc");
+    new_desc.innerHTML = "<button type='button' class='btn btn-primary btn-xs' onclick='deleteItem(" + index +");'><i class='fa fa-times'></i></button> " + (new_product.value.split("$")[0]).split(" ")[1];
+    new_desc.innerHTML += "<input type='hidden' id='hidden_p_id_" + index + "' name='p_id_" + index + "' value='" + new_product_id + "'>";
+    new_price.innerHTML = "$"+(new_product.value.split("$")[1]).split("(",1);
+    new_quantity.innerHTML = "<button type='button' onclick='decrease("+ index +");' class='btn btn-danger btn-xs'><i class='fa fa-minus'></i></button> "+"<span id='quantity_" + index + "'>" + quantity.value + "</span>"+" <button type='button' class='btn btn-success btn-xs' onclick='increase(" + index + "," + max_quantity + ");'><i class='fa fa-plus'></i></button>"+"<input type='hidden' id='hidden_quantity_" + index + "' name='quantity_" + index + "' value='" + quantity.value + "'>";
+    new_total.innerHTML = "<div id='total_"+index+"'>$"+(quantity.value * (new_product.value.split("$")[1]).split("(",1))+"</div>";
+    new_total.innerHTML += "<input type='hidden' id='hidden_total_"+index+"' name='total_"+index+"' value='"+(quantity.value * (new_product.value.split("$")[1]).split("(",1))+"'>";
+
+    // Set the total of the order
+    var total_var = document.getElementById("total").innerHTML;
+	total_var = total_var.replace('$','');
+	var new_order_total = total_var*1 + (quantity.value * (new_product.value.split("$")[1]).split("(",1))*1;
+	document.getElementById("total").innerHTML = "$" + new_order_total;
+	document.getElementById("hidden_order_total").value = new_order_total; // set hidden input so it can be accessed from POST
 }
 
 function increase(index, max_quantity)
