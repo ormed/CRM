@@ -1,60 +1,45 @@
 <?php 
 include_once 'connection/checkUser.php';
 include_once 'parts/header.php';
-include_once 'database/Order.php';
+include_once 'database/Invoice.php';
 include_once 'database/Customer.php';
-
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
-	Order::deleteOrder($_POST['order_id']);
-}
 ?>
 
 <body>
-
     <div id="wrapper">
-
         <?php include_once 'parts/nav.php';?>
-
         <!-- Page Content -->
         <div id="page-wrapper">
-        
             <div class="container-fluid">
-            
-            
-            
-            
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Orders</h1>
+                        <h1 class="page-header">Invoice</h1>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
                 <!-- /.row -->
        
        <?php 
-	      	$orders_header = Order::getOrdersHeader();
-	      	
-			foreach ($orders_header as $order) {
-       			$orders_rows = Order::getOrderRows($order['ORDER_ID']);
-             	$cust = Customer::getCustomer($order['CUST_ID']);
-             	$order_date = Order::getOrderDate($order['ORDER_ID']);
-             	$total = Order::getTotal($order['ORDER_ID'])[0]['TOTAL'];
+	      	$invoices_headers = Invoice::getInvoicesHeaders();
+
+			foreach ($invoices_headers as $invoice) {
+       			$invoice_rows = Invoice::getInvoiceRows($invoice['INVOICE_ID']);
+             	$cust = Customer::getCustomer($invoice['CUST_ID']);
+             	$invoice_date = Invoice::getInvoiceDate($invoice['INVOICE_ID']);
+             	$total = Invoice::getTotal($invoice['INVOICE_ID']);
        ?>
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
             <div>
-                <h3><strong><u>Order <?php echo $order['ORDER_ID']?>:</strong></u></h3>
+                <h3><strong><u>Invoice <?php echo $invoice['INVOICE_ID']?>:</strong></u></h3>
             </div>
             <div>
-            	<?php if(strcmp($order['STATUS'], "Open") == 0) {?>
-
-	            	<form role="form" id="edit-order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
-	            		<input type="button" class="btn btn-info" value="Edit" onClick='parent.location="edit_order.php?order_id=<?php echo $order['ORDER_ID']?>"'/>
-	            		<input type="hidden" name="order_id" value="<?php echo $order['ORDER_ID'] ?>"/>
-	            		<input type="submit" class="btn btn-danger" value="Delete" onClick=""/>
-	            	</form>
-      			<?php }?>
+            	<form role="form" id="edit-order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
+	            	<input type="button" class="btn btn-info" value="Edit" onClick='parent.location="invoice.php?invoice_id=<?php echo $invoice['INVOICE_ID']?>"'/>
+	            	<input type="hidden" name="order_id" value="<?php echo $invoice['INVOICE_ID'] ?>"/>
+	            	<input type="submit" class="btn btn-danger" value="Delete" onClick=""/>
+	            </form>
             </div>
             <br>
             <div class="row">
@@ -62,8 +47,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="panel panel-default height">
                         <div class="panel-heading">Customer Details</div>
                         <div class="panel-body">
-                            <strong>Customer Id:</strong> <?php echo $order['CUST_ID']?><br>
-                            <strong>Name:</strong> <?php echo $cust[0]['FIRST_NAME']." ".$cust[0]['LAST_NAME']?><br>
+                        	<strong>Name:</strong> <?php echo $cust[0]['FIRST_NAME']." ".$cust[0]['LAST_NAME']?><br>
+                            <strong>Customer Id:</strong> <?php echo $invoice['CUST_ID']?></br>
+                            <strong>Address:</strong> <?php echo $invoice['CUST_ID']?></br>
                         </div>
                     </div>
                 </div>
@@ -71,8 +57,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="panel panel-default height">
                         <div class="panel-heading">Order Details</div>
                         <div class="panel-body">
-                            <strong>Status:</strong> <?php echo $order['STATUS']?><br>
-                            <strong>Date:</strong> <?php echo $order_date[0]['ORDER_DATE']?>
+                            <strong>Date:</strong> <?php echo $invoice_date[0]['ORDER_DATE']?></br>
+                            <strong>Order:</strong> #<?php echo $invoice['ORDER_ID']?>
+                            
                         </div>
                     </div>
                 </div>
@@ -95,8 +82,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if($orders_rows)
-                                	foreach ($orders_rows as $row) { ?>
+                                <?php if($invoice_rows)
+                                	foreach ($invoice_rows as $row) { ?>
                                 <tr>
                                     <td><?php echo $row['DESCRIPTION']?></td>
                                     <td class="text-center">$<?php echo $row['PRICE']?></td>
@@ -129,6 +116,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     </div>
     <!-- /#wrapper -->
+
+    
 <?php include_once 'parts/bottom.php';?>
 
 </body>

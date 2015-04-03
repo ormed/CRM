@@ -96,18 +96,19 @@ include_once 'parts/header.php';?>
                                            					 </select>
                                         		</div>
                                         		<div>
-                                        			Quantity: <input name="quantity1" class="form-control" style="width:200px" placeholder="Quantity" maxlength="2" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                        			Quantity: <input name="quantity1" class="form-control" style="width:200px" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                                         		</div>
                                         		
                                         		<div id="more-items"></div>
-                                        		<div id="no-more-error"></div>
+                                        		
+										   		<div id="no-more-error"></div>  <!-- Error too much items -->
                                         		
                                         		<div>
                                         		<script type="text/javascript">
-													var i = 2;
+													var i = 1;
 												</script>
                                         			Add Items:
-                                        			<button type="button" id= "plus-items" class="btn btn-success btn-xs" onclick="addItemToDiv(i++)">+</button>
+                                        			<button type="button" id= "plus-items" class="btn btn-success btn-xs" onClick="addItemToDiv(++i)">+</button>
                                         		</div>
                                         		
                                         </div>
@@ -118,8 +119,6 @@ include_once 'parts/header.php';?>
                                                 <option>Close</option>
                                             </select>
                                         </div>
-                                        
-			  
                                         
                                         <div>
                                         <button type="submit" class="btn btn-default">Submit Order</button>
@@ -143,15 +142,16 @@ include_once 'parts/header.php';?>
     <!-- /#wrapper -->
 <script>
 function addItemToDiv(i) {
-	if(i > 5) {
-		document.getElementById("no-more-error").innerHTML = "<div class='alert alert-danger'>Can't add more than 5 items in one order!</div></div>";
-		document.getElementById("plus-items").className = "btn btn-danger btn-xs";
-	} else {
-		document.getElementById("more-items").innerHTML += "<div><i class='fa fa-cube'></i> <label>Item #"+i+"</label></div><div>Description:<select name='desc"+i+"' class='form-control' style='width:200px'><?php foreach ($results as $result) { ?><option><?php echo($result["DESCRIPTION"]);?></option><?php }?></select></div><div>Quantity:<input name='quantity"+i+"' class='form-control' style='width:200px' placeholder='Quantity' maxlength='2' onkeypress='return event.charCode >= 48 && event.charCode <= 57'></div>";
-	}
+// 	if(i > 5) { // Limit to maximum 5 items per order
+//		document.getElementById("no-more-error").innerHTML = "<div class='alert alert-danger'>Can't add more than 5 items in one order!</div></div>";
+//		document.getElementById("plus-items").className = "btn btn-danger btn-xs";
+//	} else {
+	var div = document.createElement('div');
+	div.innerHTML = "<i class='fa fa-cube'></i> <label>Item #"+i+"</label></div> <div>Description:<select name='desc"+i+"' class='form-control' style='width:200px'><?php foreach ($results as $result) { ?><option><?php echo($result["DESCRIPTION"]);?></option><?php }?></select></div> <div>Quantity:<input name='quantity"+i+"' class='form-control' style='width:200px' placeholder='Quantity' maxlength='5' onkeypress='return event.charCode >= 48 && event.charCode <= 57'>";
+	document.getElementById('more-items').appendChild(div);
+// 	}
 }
 </script>
-<!-- <script type="text/javascript" src="order.js"></script> -->
 <?php 
 include_once 'parts/bottom.php';
 include_once 'parts/footer.php'; 

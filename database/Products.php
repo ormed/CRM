@@ -10,9 +10,9 @@ class Products {
      * function to check if form was submitted ok
      * return errors if found any
      */
-    public static function testNewProduct() {
+    public static function testNewProduct($desc, $price, $quantity) {
         $err = '';
-        if ((empty($_POST['desc'])) || (empty($_POST['price'])) || (empty($_POST['quantity']))) {
+        if ((empty($desc)) || (empty($price)) || (empty($quantity))) {
             $err = "Please fill in all the fields";
         }
         return $err;
@@ -33,18 +33,18 @@ class Products {
      * insert new product
      * return FALSE if any error in inserting
      */
-    public static function insertProduct() {
+    public static function insertProduct($desc, $price, $quantity) {
     	$db = new Database();
     	$q = "merge into products d using (SELECT :cdesc description, :cprice price from dual) s ON (d.description = s.description) WHEN MATCHED THEN UPDATE SET d.price = s.price WHEN NOT MATCHED THEN INSERT (description, price) VALUES (s.description, s.price)";
     	$stid = $db->parseQuery($q);
-    	oci_bind_by_name($stid, ':cdesc', $_POST['desc']);
-    	oci_bind_by_name($stid, ':cprice', $_POST['price']);
+    	oci_bind_by_name($stid, ':cdesc', $desc);
+    	oci_bind_by_name($stid, ':cprice', $price);
     	$r = oci_execute($stid);  // executes and commits
     	
     	// Update inventory
-    	$product = Products::getProductId($_POST['desc']);
-    	$inv = Inventory::insertToInventory($product, $_POST['quantity']);
-    	return $r*$inv; // if something goes wrong returns FALSE
+    	$product = Products::getProductId($desc);
+    	$inv = Inventory::insertToInventory($product, $quantity);
+    	return $r*$inv; // if has error returns FALSE
     }
     
     public static function getProductId($desc) {

@@ -19,9 +19,6 @@
                     </a>
                     <ul class="dropdown-menu dropdown-user">
                         <li><a href="user_info.php"><i class="fa fa-user fa-fw"></i> User Profile</a>
-                        </li>
-                        <li><a href="#"><i class="fa fa-usd fa-fw"></i> My Sellings</a>
-                        </li>
                         <li class="divider"></li>
                         <li><a href="logout.php"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                         </li>
@@ -54,10 +51,13 @@
                                     <a href="customer.php">Add Customer</a>
                                 </li>
                                 <li>
-                                    <a href="product.php">Add Product</a>
+                                    <a href="product.php">Add/Edit Product</a>
                                 </li>
                                 <li>
                                     <a href="all_orders.php">All orders</a>
+                                </li>
+                                <li>
+                                    <a href="all_invoices.php">All invoices</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

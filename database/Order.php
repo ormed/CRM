@@ -145,6 +145,21 @@ class Order {
     	}	
     }
     
+    public static function deleteOrder($order_id) {
+    	$db = new Database();
+    	// Delete all rows
+    	$q = "delete from orders_rows where (order_id = :corder_id)";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':corder_id', $order_id);
+    	oci_execute($stid); // delete rows
+    	
+    	// Delete the header
+    	$q = "delete from orders_header where (order_id = :corder_id)";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':corder_id', $order_id);
+    	oci_execute($stid); // delete header
+    }
+    
     public static function getOrderHeader($order_id) {
     	$db = new Database();
     	$q = "select * from orders_header where order_id='{$order_id}'";

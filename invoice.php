@@ -9,34 +9,21 @@ include_once 'parts/header.php';
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-	$result = Order::editOrder();
-	if($result) {
-		if(strcmp($_POST['status'], "Close")) {
-			//$result = Invoice::insertInvoice();
-			$url = "invoice.php?order_id=".$_POST['order_id']; // Create Invoice
-		} else {
-			$url = "all_orders.php"; // Return to all orders
-		}
-		$success = "Order saved!";
-	} else {
-		$success = "Error! Please try again!";
-		$url = "edit_order.php?order_id=".$_POST['order_id'];
-	}
-	echo "<script> alert('$success'); window.location.href='$url';</script>";
+	// No need post
 }
 
-if (!isset($_GET['order_id'])) {
-	header("Location: all_orders.php");
+if (!isset($_GET['invoice_id'])) {
+	header("Location: all_invoices.php");
 }
 
-$order_id = $_GET['order_id'];
-$order = Order::getOrderHeader($order_id);
-$rows = Order::getOrderRows($order_id);
-$cust = Customer::getCustomer($order[0]['CUST_ID']);
-$order_date = Order::getOrderDate($order_id);	
-$total = Order::getTotal($order_id)[0]['TOTAL'];
-$status = $order[0]['STATUS'];
-if (!$order || strcmp($status, "Close") == 0) {
+$invoice_id = $_GET['invoice_id'];
+$invoice = Invoice::getInvoiceHeader($invoice_id);
+$rows = Invoice::getInvoiceRows($invoice_id);
+$cust = Customer::getCustomer($invoice[0]['CUST_ID']);
+$invoice_date = Invoice::getInvoiceDate($invoice_id);	
+$total = Invoice::getTotal($invoice_id);
+debug($total);
+if (!$invoice) {
 	//header("Location: all_orders.php");
 }	
 
@@ -58,7 +45,7 @@ if (!$order || strcmp($status, "Close") == 0) {
             
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Edit Order</h1>
+                        <h1 class="page-header">Edit Invoice</h1>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -66,11 +53,11 @@ if (!$order || strcmp($status, "Close") == 0) {
                 
   	<div class="container panel panel-default">
     	<div class="panel-heading">
-           <h3><strong>Order <?php echo $order_id?>:</strong></h3>
+           <h3><strong>Invoice <?php echo $invoice_id?>:</strong></h3>
     	</div>
     	
     	<form role="form" id="edit-order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
-    		<input type="hidden" name='order_id' value='<?php echo $order_id?>'>
+    		<input type="hidden" name='order_id' value='<?php echo $invoice_id?>'>
    			<div class="panel-body">
 		    	<div class="row">
 		    		<div class="col-lg-6">
@@ -89,16 +76,7 @@ if (!$order || strcmp($status, "Close") == 0) {
                    				<div class="panel panel-default height">
                        				<div class="panel-heading">Order Details</div>
                        				<div class="panel-body">
-                       					<div class="row">
-  											<div class="col-xs-5 col-md-3"><strong>Status:</strong></div>
-  											<div class="col-xs-3 col-md-3">
-  												<select name="status" class="form-control" style="width: 90px">
-                               						<option selected>Open</option>
-                               						<option>Close</option>
-                               					</select>
-                               				</div>
-										</div>
-                           				<strong>Date:</strong> <?php echo $order_date[0]['ORDER_DATE']?>
+                           				<strong>Date:</strong> <?php echo $invoice_date[0]['ORDER_DATE']?>
                                		</div>
                        				</div>
                    				</div>
@@ -112,7 +90,7 @@ if (!$order || strcmp($status, "Close") == 0) {
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="text-center"><strong>Order summary</strong></h3>
+                    <h3 class="text-center"><strong>Invoice Summary</strong></h3>
                 </div>
                 <div class="panel-body">
                     <div class="table-responsive">
@@ -162,7 +140,7 @@ if (!$order || strcmp($status, "Close") == 0) {
         </div>
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
-    <input type=button onClick="location.href='all_orders.php'" class="btn btn-default" value='Cancel'>
+    <input type=button onClick="location.href='all_invoices.php'" class="btn btn-default" value='Cancel'>
     
     
     </form>

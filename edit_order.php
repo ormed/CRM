@@ -96,7 +96,7 @@ if (!isset($_GET['order_id'])) {
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="text-center"><strong>Order summary</strong></h3>
+                    <h3 class="text-center"><strong>Order Summary</strong></h3>
                 </div>
                 <div class="panel-body">
                     <div class="table-responsive">
@@ -125,7 +125,7 @@ if (!isset($_GET['order_id'])) {
                                     	 <button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
                                     	 <span id='quantity_<?php echo $index?>'><?php echo $row['QUANTITY']?></span> 
                                     	 <button type="button" class="btn btn-success btn-xs" onclick="increase(<?php echo $index.",".$max_quantity?>);"><i class="fa fa-plus"></i></button>
-                                    	 <input type="hidden" id='hidden_quantity_<?php echo $index?>' name='quantity_<?php echo $index?>' value='<?php echo $row['QUANTITY']?>'>
+                                    	 <input type="hidden" id='hidden_quantity_<?php echo $index?>' name='quantity_<?php echo $index?>' value='<?php echo $row['QUANTITY'];?>'>
                                    	</td>
                                     <td class="text-right">
                                     	<div id='total_<?php echo $index?>'>$<?php echo $row['TOTAL']?></div> 
@@ -153,9 +153,13 @@ if (!isset($_GET['order_id'])) {
                             ?>
                             <button type="button" class="btn btn-success btn-xs" onclick="addProduct();"><i class="fa fa-plus"></i> Add Product </button>
                             <select id="new_product_desc" name="new_product" class="form-control" style="width:200px">
-                            <?php foreach ($results as $result) { ?>
+                            <?php foreach ($results as $result) {
+                            	$orders_rows_query = 'select * from orders_rows where (order_id ='.$order_id.' and p_id = '.$result['P_ID'].')';
+                            	$orders_rows = $db->createQuery($orders_rows_query);
+                            		if(count($orders_rows) == 0) {  
+                            				?>
                             <option><?php echo($result["P_ID"].". ".$result["DESCRIPTION"]." $".$result["PRICE"]." (".Products::getProductMaxQuantity($result["DESCRIPTION"]).")");?></option>
-                            <?php } ?>
+                            <?php } } ?>
                             </select>
                             <input id="new_product_quantity" class="form-control" style="width:200px" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                             <div class="alert alert-danger" id="danger_div" style="visibility: hidden">
@@ -298,7 +302,7 @@ function decrease(index)
 	// Decrease the total
 	var total_var = document.getElementById("total").innerHTML;
 	total_var = total_var.replace('$','');
-	var new_order_total = total_var - price;
+	var new_order_total = (total_var - price);
 	document.getElementById("total").innerHTML = "$" + new_order_total;
 	document.getElementById("hidden_order_total").value = new_order_total; // set hidden order_total input so it can be accessed from POST afterwards
 }
