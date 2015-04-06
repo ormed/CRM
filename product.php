@@ -12,7 +12,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$err = Products::testNewProduct($_POST['desc'], $_POST['price'], $_POST['quantity']);
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
-	$desc = substr($_POST['desc'], 0, strpos($_POST['desc'], ','));
+	if(isset($_POST['edit_product'])) {
+		$desc = substr($_POST['desc'], 0, strpos($_POST['desc'], ','));
+	} else {
+		$desc = $_POST['desc'];
+	}
 	debug($desc);
 	$result = Products::insertProduct($desc, $_POST['price'], $_POST['quantity']); // insert or update product
 	if($result) {

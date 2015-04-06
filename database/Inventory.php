@@ -26,5 +26,22 @@ class Inventory {
 		$result = $db->createQuery($q);
 		return $result[0]['QUANTITY'];
 	}
+	
+	public static function reduceQuantity() {
+		$db = new Database();
+		$i = 0;
+		while(isset($_POST['quantity_'.$i])) {
+			$current_quantity = Inventory::getMaxQuantity($_POST['p_id_'.$i]);
+			$new_quantity = $current_quantity - $_POST['quantity_'.$i];
+			// Update quantity
+			$q = "update inventory set quantity = :cquantity where (p_id = :cp_id)";
+			$stid = $db->parseQuery($q);
+			oci_bind_by_name($stid, ':cquantity', $new_quantity);
+			oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
+			oci_execute($stid);  // executes and commits
+			$i++;
+		}
+		
+	}
     
 }

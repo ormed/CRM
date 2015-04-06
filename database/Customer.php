@@ -61,5 +61,12 @@ class Customer {
     	}
     	return $err;
     }
+    
+    public static function getAllCustomers() {
+    	$db = new Database();
+    	$q = "select * from customers";
+    	$result = $db->createQuery($q);
+    	return $result;
+    }
 
 }

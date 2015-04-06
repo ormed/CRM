@@ -9,7 +9,9 @@ include_once 'parts/header.php';
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-	// No need post
+	// TODO - to enable edit - remove comments
+	debug($_POST);
+ 	$result = Invoice::editInvoice();
 }
 
 if (!isset($_GET['invoice_id'])) {
@@ -22,9 +24,8 @@ $rows = Invoice::getInvoiceRows($invoice_id);
 $cust = Customer::getCustomer($invoice[0]['CUST_ID']);
 $invoice_date = Invoice::getInvoiceDate($invoice_id);	
 $total = Invoice::getTotal($invoice_id);
-debug($total);
 if (!$invoice) {
-	//header("Location: all_orders.php");
+	header("Location: all_invoices.php");
 }	
 
 ?>
@@ -57,7 +58,7 @@ if (!$invoice) {
     	</div>
     	
     	<form role="form" id="edit-order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
-    		<input type="hidden" name='order_id' value='<?php echo $invoice_id?>'>
+    		<input type="hidden" name='invoice_id' value='<?php echo $invoice_id?>'>
    			<div class="panel-body">
 		    	<div class="row">
 		    		<div class="col-lg-6">
@@ -109,8 +110,14 @@ if (!$invoice) {
                                 		$max_quantity = Inventory::getMaxQuantity($row['P_ID']);
                                 	?>
                                 <tr id="content_<?php echo $index?>">
-                                    <td><button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button> <?php echo $row['DESCRIPTION']?></td>
-                                    <td id="price_<?php echo $index?>" class="text-center" >$<?php echo $row['PRICE']?></td>
+                                    <td>
+                                    	<button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button> 
+                                    	<?php echo $row['DESCRIPTION']?>
+                                    	<input type="hidden" id='hidden_p_id_<?php echo $index?>' name='p_id_<?php echo $index?>' value='<?php echo $row['P_ID']?>'>
+                                    </td>
+                                    <td id="price_<?php echo $index?>" class="text-center" >
+                                    	$<?php echo $row['PRICE']?>
+                                    </td>
                                     <td class="text-center">
                                     	<button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
                                     	 <span id='quantity_<?php echo $index?>'><?php echo $row['QUANTITY']?></span> 
@@ -168,6 +175,8 @@ function deleteItem(index)
 	document.getElementById("total").innerHTML = "$" + new_total;
 	// Decrease the hidden total
 	document.getElementById("hidden_order_total").value = new_total;
+	// Make quantity = 0
+	document.getElementById("hidden_quantity_"+index).value = 0;
 }
 
 function increase(index, max_quantity)
@@ -222,6 +231,13 @@ function decrease(index)
 </script>
     
 <?php 
+
+$int_date = 31012015;
+$string_date = ''.$int_date;
+$day = substr($string_date, 0, 2);
+$month = substr($string_date, 2, 4);
+$year = substr($string_date, 4, 8);
+
 include_once 'parts/bottom.php';
 include_once 'parts/footer.php';
 

@@ -32,18 +32,12 @@
             <div class="navbar-default sidebar" role="navigation">
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
+                    	 <li>
+                             <a href="index.php">Lobby</a>
+                        </li>
                         <li>
                             <a href="#"><i class="fa fa-wrench fa-fw"></i> Menu<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
-<!--                                 <li> -->
-<!--                                     <a href="blank.php">Blank Page</a> -->
-<!--                                 </li> -->
-                                <li>
-                                    <a href="index.php">Lobby</a>
-                                </li>
-<!--                                 <li> -->
-<!--                                     <a href="login.php">Login Page</a> -->
-<!--                                 </li> -->
                                 <li>
                                     <a href="order.php">Add Order</a>
                                 </li>
@@ -53,11 +47,23 @@
                                 <li>
                                     <a href="product.php">Add/Edit Product</a>
                                 </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-table"></i></i> Display<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
                                 <li>
-                                    <a href="all_orders.php">All orders</a>
+                                    <a href="all_products.php">Products</a>
                                 </li>
                                 <li>
-                                    <a href="all_invoices.php">All invoices</a>
+                                    <a href="all_orders.php">Orders</a>
+                                </li>
+                                <li>
+                                    <a href="all_invoices.php">Invoices</a>
+                                </li>
+                                <li>
+                                    <a href="all_customers.php">Customers</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

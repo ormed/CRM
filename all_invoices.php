@@ -3,6 +3,10 @@ include_once 'connection/checkUser.php';
 include_once 'parts/header.php';
 include_once 'database/Invoice.php';
 include_once 'database/Customer.php';
+
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	Invoice::deleteInvoice($_POST['invoice_id']);
+}
 ?>
 
 <body>
@@ -37,7 +41,7 @@ include_once 'database/Customer.php';
             <div>
             	<form role="form" id="edit-order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
 	            	<input type="button" class="btn btn-info" value="Edit" onClick='parent.location="invoice.php?invoice_id=<?php echo $invoice['INVOICE_ID']?>"'/>
-	            	<input type="hidden" name="order_id" value="<?php echo $invoice['INVOICE_ID'] ?>"/>
+	            	<input type="hidden" name="invoice_id" value="<?php echo $invoice['INVOICE_ID'] ?>"/>
 	            	<input type="submit" class="btn btn-danger" value="Delete" onClick=""/>
 	            </form>
             </div>
@@ -49,7 +53,6 @@ include_once 'database/Customer.php';
                         <div class="panel-body">
                         	<strong>Name:</strong> <?php echo $cust[0]['FIRST_NAME']." ".$cust[0]['LAST_NAME']?><br>
                             <strong>Customer Id:</strong> <?php echo $invoice['CUST_ID']?></br>
-                            <strong>Address:</strong> <?php echo $invoice['CUST_ID']?></br>
                         </div>
                     </div>
                 </div>
@@ -59,7 +62,6 @@ include_once 'database/Customer.php';
                         <div class="panel-body">
                             <strong>Date:</strong> <?php echo $invoice_date[0]['ORDER_DATE']?></br>
                             <strong>Order:</strong> #<?php echo $invoice['ORDER_ID']?>
-                            
                         </div>
                     </div>
                 </div>

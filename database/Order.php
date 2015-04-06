@@ -55,13 +55,23 @@ class Order {
         // Get the right date format to insert
         $formatDate = date("d/m/Y", strtotime($_POST['order-date']));
         oci_bind_by_name($stid, ':corder_date', $formatDate);
-        debug($formatDate);
         // Get the cust id only
         $cust_id = substr($_POST['customer'], 0, strpos($_POST['customer'], ' '));
         oci_bind_by_name($stid, ':ccust_id', $cust_id);
         oci_bind_by_name($stid, ':cstatus', $_POST['status']);
         $r = oci_execute($stid);  // executes and commits
         return $r;
+    }
+    
+    /*
+     * Close the order
+     * Make status -> 'Close'
+     */
+    public static function closeOrder($order_id, $db) {
+    	$q = "update orders_header set status= 'Close' where order_id= :corder_id";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':corder_id', $order_id);
+    	oci_execute($stid);  // executes and commits
     }
     
     /*

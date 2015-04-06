@@ -10,7 +10,8 @@ include_once 'database/Invoice.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$result = Order::editOrder();
 	if(strcmp($_POST['status'], 'Close') == 0) {
-		//$result = Invoice::insertInvoice();
+		Invoice::insertInvoice($_POST['order_id']);
+		Inventory::reduceQuantity();
 		$url = "invoice.php?order_id=".$_POST['order_id']; // Create Invoice
 	} else {
 		$url = "all_orders.php"; // Return to all orders
@@ -154,12 +155,9 @@ if (!isset($_GET['order_id'])) {
                             <button type="button" class="btn btn-success btn-xs" onclick="addProduct();"><i class="fa fa-plus"></i> Add Product </button>
                             <select id="new_product_desc" name="new_product" class="form-control" style="width:200px">
                             <?php foreach ($results as $result) {
-                            	$orders_rows_query = 'select * from orders_rows where (order_id ='.$order_id.' and p_id = '.$result['P_ID'].')';
-                            	$orders_rows = $db->createQuery($orders_rows_query);
-                            		if(count($orders_rows) == 0) {  
-                            				?>
+                            ?>
                             <option><?php echo($result["P_ID"].". ".$result["DESCRIPTION"]." $".$result["PRICE"]." (".Products::getProductMaxQuantity($result["DESCRIPTION"]).")");?></option>
-                            <?php } } ?>
+                            <?php } ?>
                             </select>
                             <input id="new_product_quantity" class="form-control" style="width:200px" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                             <div class="alert alert-danger" id="danger_div" style="visibility: hidden">
