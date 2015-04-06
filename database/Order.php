@@ -206,11 +206,7 @@ class Order {
     	$db = new Database();
     	$q = "select TO_CHAR(ORDER_DATE, 'DD/MM/YYYY') AS ORDER_DATE from ORDERS_HEADER where order_id = '{$order_id}'";
     	$result = $db->createQuery($q);
-    	if (count($result) > 0) {
-    		return $result;
-    	} else {
-    		return FALSE;
-    	}
+    	return $result;
     }
     
     public static function getOrdersHeader() {

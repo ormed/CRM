@@ -5,13 +5,16 @@ include_once 'database/Order.php';
 include_once 'database/Customer.php';
 include_once 'database/Inventory.php';
 include_once 'database/Invoice.php';
+include_once 'database/Balance.php';
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$result = Order::editOrder();
 	if(strcmp($_POST['status'], 'Close') == 0) {
+		debug($_POST);
 		Invoice::insertInvoice($_POST['order_id']);
 		Inventory::reduceQuantity();
+		Balance::insertBalance();
 		$url = "invoice.php?order_id=".$_POST['order_id']; // Create Invoice
 	} else {
 		$url = "all_orders.php"; // Return to all orders
@@ -56,6 +59,7 @@ if (!isset($_GET['order_id'])) {
     	
     	<form role="form" id="edit-order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
     		<input type="hidden" name='order_id' value='<?php echo $order_id?>'>
+    		<input type="hidden" name='order_date' value='<?php echo $order_date[0]['ORDER_DATE']?>'>
    			<div class="panel-body">
 		    	<div class="row">
 		    		<div class="col-lg-6">
