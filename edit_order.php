@@ -4,6 +4,7 @@ include_once 'parts/header.php';
 include_once 'database/Order.php';
 include_once 'database/Customer.php';
 include_once 'database/Inventory.php';
+include_once 'database/Products.php';
 include_once 'database/Invoice.php';
 include_once 'database/Balance.php';
 
@@ -28,7 +29,7 @@ if (!isset($_GET['order_id'])) {
 	$order_id = $_GET['order_id'];
 	$order = Order::getOrderHeader($order_id);
 	$rows = Order::getOrderRows($order_id);
-	$cust = Customer::getCustomer($order[0]['CUST_ID']);
+	$cust = Customer::getCustomerById($order[0]['CUST_ID']);
 	$order_date = Order::getOrderDate($order_id);	
 	$total = Order::getTotal($order_id)[0]['TOTAL'];
 	$status = $order[0]['STATUS'];
@@ -152,9 +153,7 @@ if (!isset($_GET['order_id'])) {
                         
                         <div> <!-- Add new product to order -->
                         	<?php 
-                            	$q = 'select * from products order by description';
-                              	$db = new Database();
-                         		$results = $db->createQuery($q);
+                        		$results = Products::getAllProducts();
                             ?>
                             <button type="button" class="btn btn-success btn-xs" onclick="addProduct();"><i class="fa fa-plus"></i> Add Product </button>
                             <select id="new_product_desc" name="new_product" class="form-control" style="width:200px">
@@ -180,7 +179,7 @@ if (!isset($_GET['order_id'])) {
             <!-- /.container-fluid -->
         </div>
         <!-- /#page-wrapper -->
-    </div>
+        
     </div>
     <!-- /#wrapper -->
 <script>

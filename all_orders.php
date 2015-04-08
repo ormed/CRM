@@ -17,17 +17,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <!-- Page Content -->
         <div id="page-wrapper">
-        
             <div class="container-fluid">
-            
-            
-            
-            
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="page-header">Orders</h1>
                     </div>
                     <!-- /.col-lg-12 -->
+                    <input type="button" class="btn btn-info" value="Add Order" onClick='parent.location="order.php"'/>
                 </div>
                 <!-- /.row -->
        
@@ -36,7 +32,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	      	
 			foreach ($orders_header as $order) {
        			$orders_rows = Order::getOrderRows($order['ORDER_ID']);
-             	$cust = Customer::getCustomer($order['CUST_ID']);
+             	$cust = Customer::getCustomerById($order['CUST_ID']);
              	$order_date = Order::getOrderDate($order['ORDER_ID']);
              	$total = Order::getTotal($order['ORDER_ID'])[0]['TOTAL'];
        ?>

@@ -21,7 +21,7 @@ if (!isset($_GET['invoice_id'])) {
 $invoice_id = $_GET['invoice_id'];
 $invoice = Invoice::getInvoiceHeader($invoice_id);
 $rows = Invoice::getInvoiceRows($invoice_id);
-$cust = Customer::getCustomer($invoice[0]['CUST_ID']);
+$cust = Customer::getCustomerById($invoice[0]['CUST_ID']);
 $invoice_date = Invoice::getInvoiceDate($invoice_id);	
 $total = Invoice::getTotal($invoice_id);
 if (!$invoice) {

@@ -20,7 +20,10 @@ include_once 'parts/header.php';
 						<h1 class="page-header">All Products</h1>
 					</div>
 					<!-- /.col-lg-12 -->
+					<input type="button" class="btn btn-primary" value="Add/Edit" onClick='parent.location="product.php"'/> 
+					<input type="button" class="btn btn-info" value="Search" onClick='parent.location="search_product.php"'/>
 				</div>
+				</br>
 				<!-- /.row -->
                     <div class="panel panel-default">
                         <div class="panel-heading">

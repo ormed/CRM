@@ -91,7 +91,7 @@ class Order {
     	return $r;
     }
     
-    /*
+    /**
      * Get the last record added 
      */
     public static function getLastAdded() {
@@ -105,8 +105,8 @@ class Order {
     	}
     }
     
-    /*
-     * Update the order
+    /**
+     * Update an order 
      */
     public static function editOrder() {
     	$db = new Database();
@@ -155,6 +155,10 @@ class Order {
     	}	
     }
     
+    /**
+     * Delete an order by its id
+     * @param int $order_id
+     */
     public static function deleteOrder($order_id) {
     	$db = new Database();
     	// Delete all rows
@@ -170,6 +174,11 @@ class Order {
     	oci_execute($stid); // delete header
     }
     
+    /**
+     * Find the order header details by its id
+     * @param int $order_id
+     * @return an array of the order header if found or FALSE otherwise
+     */
     public static function getOrderHeader($order_id) {
     	$db = new Database();
     	$q = "select * from orders_header where order_id='{$order_id}'";
@@ -181,6 +190,11 @@ class Order {
     	}
     }
     
+    /**
+     * Find the order rows by id
+     * @param int $order_id
+     * @return array of order rows if found or FALSE otherwise
+     */
     public static function getOrderRows($order_id) {
     	$db = new Database();
     	$q = "select p.p_id, p.description, p.price, r.quantity, (P.PRICE*R.QUANTITY) as Total from orders_rows r, products p where r.p_id = p.p_id and r.order_id = '{$order_id}'";
@@ -192,6 +206,11 @@ class Order {
     	}
     }
     
+    /**
+     * Find total price of an order by its id
+     * @param int $order_id
+     * @return the total price of the order
+     */
     public static function getTotal($order_id) {
     	$db = new Database();
     	$q = "select sum(TOTAL) as total from (Select p.description, p.price, r.quantity, (P.PRICE*R.QUANTITY) as Total from orders_rows r, products p where r.p_id = p.p_id and r.order_id = '{$order_id}')";
@@ -202,6 +221,11 @@ class Order {
     	return $total;
     }
     
+    /**
+     * Find order date by id
+     * @param int $order_id
+     * @return String of the order's date
+     */
     public static function getOrderDate($order_id) {
     	$db = new Database();
     	$q = "select TO_CHAR(ORDER_DATE, 'DD/MM/YYYY') AS ORDER_DATE from ORDERS_HEADER where order_id = '{$order_id}'";
@@ -209,14 +233,14 @@ class Order {
     	return $result;
     }
     
+    /**
+     * Find all orders headers
+     * @return array of headers
+     */
     public static function getOrdersHeader() {
     	$db = new Database();
     	$q = "select * from orders_header order by order_id";
     	$result = $db->createQuery($q);
-    	if (count($result) > 0) {
-    		return $result;
-    	} else {
-    		return FALSE;
-    	}
+    	return $result;
     }
 }

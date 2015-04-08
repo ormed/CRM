@@ -21,11 +21,13 @@ include_once 'database/Customer.php';
 						<h1 class="page-header">All Customers</h1>
 					</div>
 					<!-- /.col-lg-12 -->
+					<input type="button" class="btn btn-info" value="Add/Edit Customer" onClick='parent.location="customer.php"'/>
 				</div>
+				</br>
 				<!-- /.row -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Products
+                            Customers
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -42,7 +44,6 @@ include_once 'database/Customer.php';
                                         <?php 
                                         
                                         $results = Customer::getAllCustomers();
-                                        debug($results);
                                         
                                         foreach ($results as $result) {
                                         	?>                 

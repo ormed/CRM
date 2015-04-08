@@ -9,6 +9,7 @@ $err = '';
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+	// Check all input fields filled fine 
 	$err = Products::testNewProduct($_POST['desc'], $_POST['price'], $_POST['quantity']);
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
@@ -17,7 +18,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
 	} else {
 		$desc = $_POST['desc'];
 	}
-	debug($desc);
 	$result = Products::insertProduct($desc, $_POST['price'], $_POST['quantity']); // insert or update product
 	if($result) {
 		if(isset($_POST['new_product'])) {
@@ -113,9 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
                                     	<?php }?>
                                     	
                                     	<?php 
-			                            	$q = 'select p.p_id, p.description, p.price, i.quantity from products p, inventory i where p.p_id = i.p_id order by description';
-			                              	$db = new Database();
-			                         		$results = $db->createQuery($q);
+                                    		$results = Products::getAllProducts();
 			                            ?>
                                     	
                                         <div class="form-group">
@@ -144,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
                         <!-- /.panel-body -->
                     </div>
                     
-                    <input type=button onClick="location.href='index.php'" class="btn btn-primary" value='Back'>
+                    <input type=button onClick="location.href='all_products.php'" class="btn btn-primary" value='Back'>
             </div>
             <!-- /.container-fluid -->
         </div>
@@ -162,7 +160,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
     	    document.getElementById("edit_price").value = price;
     	    document.getElementById("edit_quantity").value = quantity;
     	}
-
     </script>
     
 <?php 

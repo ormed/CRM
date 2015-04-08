@@ -43,7 +43,10 @@
                                     <a href="order.php">Add Order</a>
                                 </li>
                                 <li>
-                                    <a href="customer.php">Add Customer</a>
+                                    <a href="edit_order_menu.php">Edit Order</a>
+                                </li>
+                                <li>
+                                    <a href="customer.php">Add/Edit Customer</a>
                                 </li>
                                 <li>
                                     <a href="product.php">Add/Edit Product</a>
@@ -65,6 +68,24 @@
                                 </li>
                                 <li>
                                     <a href="all_customers.php">Customers</a>
+                                </li>
+                            </ul>
+                            <!-- /.nav-second-level -->
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-search"></i> Search<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li>
+                                    <a href="search_product.php">Search Product</a>
+                                </li>
+                                <li>
+                                    <a href="search_customer.php">Search Customer</a>
+                                </li>
+                                <li>
+                                    <a href="customer.php">Search Order</a>
+                                </li>
+                                <li>
+                                    <a href="product.php">Search Invoice</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

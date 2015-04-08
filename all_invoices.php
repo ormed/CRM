@@ -28,7 +28,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 			foreach ($invoices_headers as $invoice) {
        			$invoice_rows = Invoice::getInvoiceRows($invoice['INVOICE_ID']);
-             	$cust = Customer::getCustomer($invoice['CUST_ID']);
+             	$cust = Customer::getCustomerById($invoice['CUST_ID']);
              	$invoice_date = Invoice::getInvoiceDate($invoice['INVOICE_ID']);
              	$total = Invoice::getTotal($invoice['INVOICE_ID']);
        ?>
