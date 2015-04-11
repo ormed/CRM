@@ -34,21 +34,25 @@ class Order {
      * Insert new order 
      */
     public static function insertNewOrder() {
+    	$db = new Database();
     	$total_price = 0;
-    	$headerResult = Order::insertHeader();
+    	$headerResult = Order::insertHeader($db);
     	if($headerResult) { // Added new header
-    		$order_id = Order::getLastAdded()[0]['LAST'];
+    		$order_id = Order::getLastAdded($db)[0]['LAST'];
     		$i = 1;
     		while(isset($_POST['desc'.$i])) { // Insert new rows to the new header
     			$_POST['desc'.$i] = explode(",",$_POST['desc'.$i])[0];
-    			
-     			$rowResult = Order::insertRow($i, $order_id);
-     			$total_price += $_POST['price'.$i]*$_POST['quantity'.$i];
+    			$p_id = Products::getProductId($_POST['desc'.$i]);
+     			$rowResult = Order::insertRow($i, $order_id, $p_id, $_POST['quantity'.$i], $db);
+     			$total_price += ($_POST['price'.$i]*$_POST['quantity'.$i]);
+     			if(strcmp($_POST['status'], 'Close') == 0) { // Add to Balance if Close
+     				Balance::insertBalanceWithParameters($p_id, $_POST['quantity'.$i], 'Credit', $db);
+     				Products::reduceQuantity($p_id, $_POST['quantity'.$i], $db);
+     			}
     			$i++;
     		}
     		if(strcmp($_POST['status'], 'Close') == 0) { // Create Invoice if Close
-    			Invoice::insertInvoice($order_id);
-    			Balance::insertBalanceWithParameters($_POST['p_id'.$i], $_POST['quantity'.$i], 'Credit');
+    			Invoice::insertInvoice($order_id, $db);
     		}
     	} else { // Error in adding new header
     		return FALSE;
@@ -59,8 +63,7 @@ class Order {
     /*
      * Create new order header
      */
-    public static function insertHeader() {
-    	$db = new Database();
+    public static function insertHeader($db) {
     	$q = "insert into orders_header(ORDER_DATE, CUST_ID, STATUS) values (to_date(:corder_date, 'dd/mm/yyyy'), :ccust_id, :cstatus)";
         $stid = $db->parseQuery($q);
         // Get the right date format to insert
@@ -89,15 +92,13 @@ class Order {
      * Create new  order row
      * @param $index - the row num
      */
-    public static function insertRow($index, $order_id) {
-    	$db = new Database();
+    public static function insertRow($index, $order_id, $p_id, $quantity, $db) {
     	$q = "insert into orders_rows(ORDER_ID, ROW_NUM, P_ID, QUANTITY) values (:corder_id, :crow_num, :cp_id, :cquantity)";
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':corder_id', $order_id);
     	oci_bind_by_name($stid, ':crow_num', $index);
-    	$p_id = Products::getProductId($_POST['desc'.$index]);
     	oci_bind_by_name($stid, ':cp_id', $p_id);
-    	oci_bind_by_name($stid, ':cquantity', $_POST['quantity'.$index]);
+    	oci_bind_by_name($stid, ':cquantity', $quantity);
     	$r = oci_execute($stid);  // executes and commits
     	return $r;
     }
@@ -105,15 +106,10 @@ class Order {
     /**
      * Get the last record added 
      */
-    public static function getLastAdded() {
-    	$db = new Database();
+    public static function getLastAdded($db) {
     	$q = "select max(order_id) as last from orders_header";
     	$result = $db->createQuery($q);
-    	if (count($result) > 0) {
-    		return $result;
-    	} else {
-    		return FALSE;
-    	}
+    	return $result;
     }
     
     /**
@@ -230,8 +226,6 @@ class Order {
     	} else {
     		$cust_ids = "NULL";
     	}
-    	
-    	debug($cust_ids);
     	
     	// Get the right date format to insert
     	$start = date("d/m/Y", strtotime($start_date));

@@ -40,7 +40,7 @@ class Products {
      */
     public static function getAllProducts() {
     	$db = new Database();
-    	$q = 'select p.p_id, p.description, p.price, i.quantity from products p, inventory i where p.p_id = i.p_id order by description';
+    	$q = "select * from products p, inventory i where p.p_id = i.p_id order by p.description";
     	$results = $db->createQuery($q);
     	return $results;
     }
@@ -109,6 +109,18 @@ class Products {
     	} else {
     		return FALSE;
     	}
+    }
+    
+    public static function reduceQuantity($p_id, $quantity, $db) {
+    	$q = "select * from products p, inventory i where i.p_id = p.p_id and p.p_id = '{$p_id}'";
+    	$result = $db->createQuery($q);
+    	$old_quantity = $result[0]['QUANTITY'];
+    	$new_quantity = $old_quantity - $quantity;
+    	$q = "UPDATE inventory SET quantity = :cquantity WHERE p_id = :cp_id";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':cquantity', $new_quantity);
+    	oci_bind_by_name($stid, ':cp_id', $p_id);
+    	oci_execute($stid);  // executes and commits
     }
     
     /**

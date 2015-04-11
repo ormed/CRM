@@ -2,6 +2,7 @@
 @session_start();
 
 include_once 'database/Database.php';
+include_once 'database/Products.php';
 
 class Balance {
 
@@ -10,7 +11,6 @@ class Balance {
      */
     public static function insertBalance() {
         $db = new Database();
-        
         $move_date = $_POST['order_date'];
         $i = 0;
         while(isset($_POST['quantity_'.$i])) {
@@ -27,8 +27,7 @@ class Balance {
         
     }
     
-    public static function insertBalanceWithParameters($p_id, $quantity, $essence) {
-    	$db = new Database();
+    public static function insertBalanceWithParameters($p_id, $quantity, $essence, $db) {
     	$move_date = date("d/m/Y"); // get current date
     	$q = "insert into balance (move_date, p_id, quantity, essence) values (to_date(:cmove_date, 'dd/mm/yyyy'), :cp_id, :cquantity, :cessence)";
     	$stid = $db->parseQuery($q);
@@ -55,6 +54,17 @@ class Balance {
     	return $result;
     }
     
+    public static function getAllBalanceByDate($start, $end) {
+    	$db = new Database();
+    	// Get the right date format to insert
+    	$start = date("d/m/Y", strtotime($start));
+    	$end = date("d/m/Y", strtotime($end));
+    	
+    	$q = "select * from balance where move_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy') order by move_date, move_id";
+    	$result = $db->createQuery($q);
+    	return $result;
+    }
+    
     public static function getBalanceDate($move_id) {
     	$db = new Database();
     	$q = "select TO_CHAR(MOVE_DATE, 'dd/mm/yyyy') as MOVE_DATE from balance where move_id = '{$move_id}'";
@@ -62,6 +72,13 @@ class Balance {
     	return $result;
     }
     
+
+    /**
+     * Get Balance by start and end dates
+     * @param Date $start_date
+     * @param Date $end_date
+     * @return array of moves:
+     */
     public static function getTotalBalance($move_id) {
     	$db = new Database();
     	$q = "select sum(multi*total) as total from
@@ -71,6 +88,23 @@ class Balance {
 		    		select a.essence, (a.quantity*p.price) as total from balance a, balance b, products p where a.move_date=b.move_date and p.p_id = a.p_id  and b.move_id='{$move_id}' and a.move_id <= b.move_id
 		    	)
     		)";
+    	$result = $db->createQuery($q);
+    	return $result;
+    }
+    
+    public static function getTotalBalanceByDate($start, $end, $move_id) {
+    	$db = new Database();
+    	// Get the right date format to insert
+    	$start = date("d/m/Y", strtotime($start));
+    	$end = date("d/m/Y", strtotime($end));
+    	
+    	$q = "select sum(multi*total) as total from
+    	(SELECT (CASE WHEN essence = 'Credit' THEN 1 ELSE -1 END) AS multi, total
+    	from (	select a.essence, (a.quantity*p.price) as total from balance a, balance b, products p where a.move_date<b.move_date and p.p_id = a.p_id  and b.move_id='{$move_id}' and a.move_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy')
+    	UNION
+    	select a.essence, (a.quantity*p.price) as total from balance a, balance b, products p where a.move_date=b.move_date and p.p_id = a.p_id  and b.move_id='{$move_id}' and a.move_id <= b.move_id and a.move_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy')
+    	)
+    	)";
     	$result = $db->createQuery($q);
     	return $result;
     }

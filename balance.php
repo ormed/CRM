@@ -45,12 +45,12 @@ include_once 'database/Products.php';
                                     </thead>
                                     <tbody>
                                         <?php 
-
                                         $results = Balance::getBalance();
-                                        
                                         foreach ($results as $result) {
+                                        	debug($result);
                                         	$move_date = Balance::getBalanceDate($result['MOVE_ID']);
                                         	$description = Products::getProductDesc($result['P_ID']);
+                                        	//debug($description);
                                         	$price = Products::getProductPrice($result['P_ID']);
                                         	$balance = Balance::getTotalBalance($result['MOVE_ID']);
                                         	?>                 
@@ -61,7 +61,7 @@ include_once 'database/Products.php';
 												<td><?php echo($price)?></td>
 												<td><?php echo($result['QUANTITY'])?></td>
 												<td><?php echo($result['ESSENCE'])?></td>
-												<td><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo($balance[0]['TOTAL'])?></td>
+												<td><strong><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo($balance[0]['TOTAL'])?></strong></td>
 											</tr>
 										<?php 
                                         }

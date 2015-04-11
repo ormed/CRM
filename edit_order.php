@@ -12,7 +12,6 @@ include_once 'database/Balance.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$result = Order::editOrder();
 	if(strcmp($_POST['status'], 'Close') == 0) {
-		debug($_POST);
 		Invoice::insertInvoice($_POST['order_id']);
 		Inventory::reduceQuantity();
 		Balance::insertBalance();

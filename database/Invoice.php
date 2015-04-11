@@ -82,7 +82,7 @@ class Invoice {
     	// Add to Balance as Debit
     	$results = Invoice::getInvoiceRows($invoice_id);
     	foreach ($results as $result) {
-    		Balance::insertBalanceWithParameters($result['P_ID'], $result['QUANTITY'], 'Debit');
+    		Balance::insertBalanceWithParameters($result['P_ID'], $result['QUANTITY'], 'Debit', $db);
     	}
     	// Delete all rows
     	$q = "delete from invoice_rows where (invoice_id = :cinvoice_id)";

@@ -11,15 +11,15 @@ class Customer {
 	 */
 	public static function testNewCustomer($first_name, $last_name) {
 		$err = '';
-		if ((empty($_POST['first_name'])) || (empty($_POST['last_name']))) {
+		if ((empty($first_name)) || (empty($last_name))) {
 			$err = "Please fill in all the form";
 		} else {
 			$string_exp = "/^[A-Za-z .'-]+$/";
-			if (!preg_match($string_exp, $_POST['first_name'])) {
+			if (!preg_match($string_exp, $first_name)) {
 				$err = 'The First Name you entered does not appear to be valid.';
 				return $err;
 			}
-			if (!preg_match($string_exp, $_POST['last_name'])) {
+			if (!preg_match($string_exp, $last_name)) {
 				$err = 'The Last Name you entered does not appear to be valid.';
 				return $err;
 			}
