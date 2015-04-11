@@ -8,13 +8,13 @@ class Database {
 
 	// contructor for creating a connection to the database
 	public function __construct() {
-		$this->_dbh = oci_connect ( $this->_username, $this->_password, $this->_oracle_sid );
+		$this->_dbh = oci_connect ( $this->_username, $this->_password, $this->_oracle_sid);
 		if ($this->_dbh) {
 		}
 		else {
 			$err = oci_error ();
 			debug("Connection failed: " . $err);
-			trigger_error ( htmlentities ( $err ['message'], ENT_QUOTES ), E_USER_ERROR );
+			trigger_error ( htmlentities ( $err ['message'], ENT_QUOTES ), E_USER_ERROR);
 
 		}
 	}

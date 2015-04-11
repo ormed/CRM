@@ -3,6 +3,8 @@
 
 include_once 'database/Database.php';
 include_once 'database/Products.php';
+include_once 'database/Invoice.php';
+include_once 'database/Balance.php';
 
 class Order {
 
@@ -32,17 +34,26 @@ class Order {
      * Insert new order 
      */
     public static function insertNewOrder() {
+    	$total_price = 0;
     	$headerResult = Order::insertHeader();
     	if($headerResult) { // Added new header
     		$order_id = Order::getLastAdded()[0]['LAST'];
     		$i = 1;
     		while(isset($_POST['desc'.$i])) { // Insert new rows to the new header
+    			$_POST['desc'.$i] = explode(",",$_POST['desc'.$i])[0];
+    			
      			$rowResult = Order::insertRow($i, $order_id);
+     			$total_price += $_POST['price'.$i]*$_POST['quantity'.$i];
     			$i++;
+    		}
+    		if(strcmp($_POST['status'], 'Close') == 0) { // Create Invoice if Close
+    			Invoice::insertInvoice($order_id);
+    			Balance::insertBalanceWithParameters($_POST['p_id'.$i], $_POST['quantity'.$i], 'Credit');
     		}
     	} else { // Error in adding new header
     		return FALSE;
     	}
+    	return $total_price;
     }
     
     /*
@@ -206,6 +217,37 @@ class Order {
     	}
     }
     
+    public static function getOrdersDetails($order_id, $cust_id, $start_date, $end_date, $first_name, $last_name) {
+    	$db = new Database();
+    	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name);
+    	
+    	if(count($customers) > 0) {
+    		$cust_ids = "";
+    		foreach ($customers as $index=>$customer) {
+    			$cust_ids .= ($customer['CUST_ID'].',');
+    		}
+    		$cust_ids[strlen($cust_ids)-1] = "";
+    	} else {
+    		$cust_ids = "NULL";
+    	}
+    	
+    	debug($cust_ids);
+    	
+    	// Get the right date format to insert
+    	$start = date("d/m/Y", strtotime($start_date));
+    	$end = date("d/m/Y", strtotime($end_date));
+    	 
+    	$q = "select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and i.order_id='{$order_id}'
+	    	UNION
+	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and i.cust_id='{$cust_id}'
+	    	UNION
+	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and i.order_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy')
+	    	UNION
+	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where  i.cust_id=c.cust_id and i.cust_id IN ({$cust_ids})";
+    	$results = $db->createQuery($q);
+    	return $results;
+    }
+    
     /**
      * Find total price of an order by its id
      * @param int $order_id
@@ -240,6 +282,17 @@ class Order {
     public static function getOrdersHeader() {
     	$db = new Database();
     	$q = "select * from orders_header order by order_id";
+    	$result = $db->createQuery($q);
+    	return $result;
+    }
+    
+    /**
+     * Find all Open orders headers
+     * @return array of headers
+     */
+    public static function getOpenOrdersHeader() {
+    	$db = new Database();
+    	$q = "select * from orders_header where status='Open' order by order_id";
     	$result = $db->createQuery($q);
     	return $result;
     }

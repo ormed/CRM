@@ -9,8 +9,6 @@ include_once 'parts/header.php';
 
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-	// TODO - to enable edit - remove comments
-	debug($_POST);
  	$result = Invoice::editInvoice();
 }
 
@@ -52,7 +50,7 @@ if (!$invoice) {
                 </div>
                 <!-- /.row -->
                 
-  	<div class="container panel panel-default">
+  	<div class="panel panel-default">
     	<div class="panel-heading">
            <h3><strong>Invoice <?php echo $invoice_id?>:</strong></h3>
     	</div>
@@ -146,8 +144,9 @@ if (!$invoice) {
             </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-default">Submit</button>
-    <input type=button onClick="location.href='all_invoices.php'" class="btn btn-default" value='Cancel'>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <input type=button onClick="location.href='all_invoices.php'" class="btn btn-primary" value='Cancel'>
+    <input type=button onClick="location.href='search_invoice.php'" class="btn btn-primary" value='Search'>
     
     
     </form>

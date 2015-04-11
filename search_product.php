@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="table-responsive">
-                                <table class="table table-striped">
+                                <table class="table table-hover">
                                     <thead>
                                         <tr>
                                             <th>#Product Id</th>
@@ -37,11 +37,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <tbody>
                                         <?php                             
                                         foreach ($results as $result) {
-                                        	?>                 
+                                        ?>                 
                                     		<tr>
 												<td><?php echo($result["P_ID"]); ?></td>
 												<td><?php echo($result["DESCRIPTION"])?></td>
-												<td><?php echo($result["PRICE"])?></td>
+												<td>$<?php echo($result["PRICE"])?></td>
 												<td><?php echo($result["QUANTITY"])?></td>
 											</tr>
 										<?php 
@@ -91,11 +91,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         	<form role="form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
 	                        	<div class="form-group">
 	                            	<i class="fa fa-caret-right"></i> <label>Product Id</label>
-	                            	<input class="form-control" name="p_id" maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
+	                            	<input class="form-control" name="p_id" style="width:200px" maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
 	                            </div>
 	                            <div class="form-group">
 	                            	<i class="fa fa-caret-right"></i> <label>Product Description</label>
-	                            	<input class="form-control" name="desc">
+	                            	<input class="form-control" name="desc" style="width:200px">
 	                            </div>
 	                            
 	                            <button type="submit" class="btn btn-success">Search</button>

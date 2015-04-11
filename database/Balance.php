@@ -27,8 +27,16 @@ class Balance {
         
     }
     
-    public static function editBalance() {
-    	
+    public static function insertBalanceWithParameters($p_id, $quantity, $essence) {
+    	$db = new Database();
+    	$move_date = date("d/m/Y"); // get current date
+    	$q = "insert into balance (move_date, p_id, quantity, essence) values (to_date(:cmove_date, 'dd/mm/yyyy'), :cp_id, :cquantity, :cessence)";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':cmove_date', $move_date);
+    	oci_bind_by_name($stid, ':cp_id', $p_id);
+    	oci_bind_by_name($stid, ':cquantity', $quantity);
+    	oci_bind_by_name($stid, ':cessence', $essence);
+    	oci_execute($stid);  // executes and commits
     }
     
     public static function deleteBalance($move_id) {
@@ -42,7 +50,7 @@ class Balance {
     
     public static function getBalance() {
     	$db = new Database();
-    	$q = "select * from balance order by move_id";
+    	$q = "select * from balance order by move_date, move_id";
     	$result = $db->createQuery($q);
     	return $result;
     }
@@ -56,13 +64,22 @@ class Balance {
     
     public static function getTotalBalance($move_id) {
     	$db = new Database();
-    	$q = "select sum(credit2) as total from (select a.move_id, b.move_id, 
-    			(a.quantity*i.price) as credit1 , (b.quantity*j.price) as credit2 
-    			from balance a, balance b, products i, products j
-    			where(a.move_id >= b.move_id and a.p_id = i.p_id and b.p_id = j.p_id and a.move_id = '{$move_id}'))";
+    	$q = "select sum(multi*total) as total from
+		    (SELECT (CASE WHEN essence = 'Credit' THEN 1 ELSE -1 END) AS multi, total
+		    from (	select a.essence, (a.quantity*p.price) as total from balance a, balance b, products p where a.move_date<b.move_date and p.p_id = a.p_id  and b.move_id='{$move_id}'
+		    		UNION
+		    		select a.essence, (a.quantity*p.price) as total from balance a, balance b, products p where a.move_date=b.move_date and p.p_id = a.p_id  and b.move_id='{$move_id}' and a.move_id <= b.move_id
+		    	)
+    		)";
     	$result = $db->createQuery($q);
     	return $result;
     }
+    
+//     $q = "select sum(multi*total) as total from
+//     (SELECT (CASE WHEN essence = 'Credit' THEN 1 ELSE -1 END) AS multi, total
+//     from (select a.essence, (a.quantity*p.price) as total from balance a, balance b, products p where a.move_date<=b.move_date and p.p_id = a.p_id and b.move_id='{$move_id}'
+//     ))";
+    
     
     
 }

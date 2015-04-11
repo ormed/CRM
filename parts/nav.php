@@ -82,10 +82,10 @@
                                     <a href="search_customer.php">Search Customer</a>
                                 </li>
                                 <li>
-                                    <a href="customer.php">Search Order</a>
+                                    <a href="search_order.php">Search Order</a>
                                 </li>
                                 <li>
-                                    <a href="product.php">Search Invoice</a>
+                                    <a href="search_invoice.php">Search Invoice</a>
                                 </li>
                             </ul>
                             <!-- /.nav-second-level -->

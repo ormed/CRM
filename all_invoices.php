@@ -3,6 +3,7 @@ include_once 'connection/checkUser.php';
 include_once 'parts/header.php';
 include_once 'database/Invoice.php';
 include_once 'database/Customer.php';
+include_once 'database/Balance.php';
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	Invoice::deleteInvoice($_POST['invoice_id']);

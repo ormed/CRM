@@ -65,6 +65,7 @@ include_once 'parts/header.php';
 							</table>
 						</div>
 						<!-- /.table-responsive -->
+						<input type=button onClick="location.href='customer.php'" class="btn btn-primary" value='Add/Edit Customer'>
 					</div>
 					<!-- /.panel-body -->
 				</div>

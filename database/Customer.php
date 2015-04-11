@@ -48,9 +48,9 @@ class Customer {
     	$db = new Database();
     	$q = "select * from customers where cust_id='{$cust_id}' 
     		  UNION 
-    		  select * from customers where first_name='{$first_name}' 
+    		  select * from customers where Initcap(first_name) like Initcap('{$first_name}')
     		  UNION 
-    		  select * from customers where last_name='{$last_name}'";
+    		  select * from customers where Initcap(last_name) like Initcap('{$last_name}')";
     	$result = $db->createQuery($q);
     	return $result;
     }

@@ -61,7 +61,7 @@ include_once 'database/Products.php';
 												<td><?php echo($price)?></td>
 												<td><?php echo($result['QUANTITY'])?></td>
 												<td><?php echo($result['ESSENCE'])?></td>
-												<td><?php echo($balance[0]['TOTAL'])?></td>
+												<td><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo($balance[0]['TOTAL'])?></td>
 											</tr>
 										<?php 
                                         }

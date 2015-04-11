@@ -33,7 +33,7 @@ if (!isset($_GET['order_id'])) {
 	$order_date = Order::getOrderDate($order_id);	
 	$total = Order::getTotal($order_id)[0]['TOTAL'];
 	$status = $order[0]['STATUS'];
-	if (!$order || strcmp($status, "Close") == 0) {
+	if (!$order) {
 		header("Location: all_orders.php");
 	}	
 
@@ -53,7 +53,7 @@ if (!isset($_GET['order_id'])) {
                 </div>
                 <!-- /.row -->
                 
-  	<div class="container panel panel-default">
+  	<div class="panel panel-default">
     	<div class="panel-heading">
            <h3><strong>Order <?php echo $order_id?>:</strong></h3>
     	</div>
@@ -82,10 +82,13 @@ if (!isset($_GET['order_id'])) {
                        					<div class="row">
   											<div class="col-xs-5 col-md-3"><strong>Status:</strong></div>
   											<div class="col-xs-3 col-md-3">
+  											
+  											<?php if(strcmp($status, "Open") == 0) { ?>
   												<select name="status" class="form-control" style="width: 90px">
                                						<option selected>Open</option>
                                						<option>Close</option>
                                					</select>
+                               				<?php } else { echo ($order_date[0]['ORDER_DATE']); }?>
                                				</div>
 										</div>
                            				<strong>Date:</strong> <?php echo $order_date[0]['ORDER_DATE']?>
@@ -122,15 +125,21 @@ if (!isset($_GET['order_id'])) {
                                 	?>
                                 <tr id="content_<?php echo $index?>">
                                     <td>
+                                    	<?php if(strcmp($status, "Open") == 0) { ?>
                                     	<button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button> 
+                                    	<?php } ?>
                                     	<?php echo $row['DESCRIPTION']?>
                                     	<input type="hidden" id='hidden_p_id_<?php echo $index?>' name='p_id_<?php echo $index?>' value='<?php echo $row['P_ID']?>'>
                                     </td>
                                     <td id="price_<?php echo $index?>" class="text-center" >$<?php echo $row['PRICE']?></td>
                                     <td class="text-center">
+                                    	 <?php if(strcmp($status, "Open") == 0) { ?>
                                     	 <button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
+                                    	 <?php } ?>
                                     	 <span id='quantity_<?php echo $index?>'><?php echo $row['QUANTITY']?></span> 
+                                    	 <?php if(strcmp($status, "Open") == 0) { ?>
                                     	 <button type="button" class="btn btn-success btn-xs" onclick="increase(<?php echo $index.",".$max_quantity?>);"><i class="fa fa-plus"></i></button>
+                                    	 <?php } ?>
                                     	 <input type="hidden" id='hidden_quantity_<?php echo $index?>' name='quantity_<?php echo $index?>' value='<?php echo $row['QUANTITY'];?>'>
                                    	</td>
                                     <td class="text-right">
@@ -150,7 +159,7 @@ if (!isset($_GET['order_id'])) {
                                 </tr>
                             </tbody>
                         </table>
-                        
+                        <?php if(strcmp($status, 'Open') == 0) { ?>
                         <div> <!-- Add new product to order -->
                         	<?php 
                         		$results = Products::getAllProducts();
@@ -167,13 +176,17 @@ if (!isset($_GET['order_id'])) {
                             	<span id="err"></span>
                             </div>
                         </div>
+                        <?php } ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-default">Submit</button>
-    <input type=button onClick="location.href='all_orders.php'" class="btn btn-default" value='Cancel'>
+    <?php if(strcmp($status, 'Open') == 0) { ?>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <input type=button onClick="location.href='all_orders.php'" class="btn btn-primary" value='Cancel'>
+    <?php } ?>
+    <input type=button onClick="location.href='search_order.php'" class="btn btn-primary" value='Search'>
     </form>   
             </div>
             <!-- /.container-fluid -->

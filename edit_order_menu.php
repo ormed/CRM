@@ -42,25 +42,32 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <form role="form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
                                     	
                                     	<?php 
-			                            	$orders_headers = Order::getOrdersHeader();
+			                            	$orders_headers = Order::getOpenOrdersHeader();
+			                            	debug($orders_headers);
 			                            ?>
                                     	
                                         <div class="form-group">
                                             <i class="fa fa-info-circle"></i> <label>Order Id</label>
-                                            <select id="option_order" name="order_id" onchange="showDetails();" class="form-control" style="width:200px">
+                                            <select id="option_order" name="order_id" onchange="showDetails(<?php echo count($orders_headers);?>);" class="form-control" style="width:200px">
 				                            <?php foreach ($orders_headers as $index=>$order) { 
 				                            		if(strcmp($order['STATUS'], "Open") == 0) {
 				                            ?>
 				                            <option value='<?php echo($order['ORDER_ID'].",".$index)?>'><?php echo($order['ORDER_ID'])?></option>
 				                            <?php 	} } ?>
 				                            </select>
+				                           
 				                            
-				                             <?php foreach ($orders_headers as $order_index=>$order) { 
+				                            <?php foreach ($orders_headers as $order_index=>$order) { 
 				                            		if(strcmp($order['STATUS'], "Open") == 0) {
 				                            			$rows = Order::getOrderRows($order['ORDER_ID']);
 				                            			$total = Order::getTotal($order['ORDER_ID'])[0]['TOTAL'];
 				                            ?>
+				                            </br>
+				                            <?php if($order_index == 0) { ?>
+				                            <div id="summary_<?php echo $order_index ?>" class="row" style="display: block;">
+				                            <?php } else { ?>
 				                            <div id="summary_<?php echo $order_index ?>" class="row" style="display: none;">
+				                            <?php } ?>
 										        <div class="col-md-12">
 										            <div class="panel panel-default">
 										                <div class="panel-heading">
@@ -113,10 +120,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 				                            
 				                            
 				                           <?php } }?>
-				                            
+				                         <button type="submit" class="btn btn-success">Edit</button>  
                                         </div>
-                                        
-                                        <button type="submit" class="btn btn-success">Submit</button>
+
                                     </form>
                                 </div>
                             </div>
@@ -136,15 +142,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	
 	
 	<script>
-	function showDetails() 
+	function showDetails(total) 
 	{
-		for(var i=0; i<3; i++) {
-			document.getElementById("summary_"+i).style.display='none';
-		}
 		var x = document.getElementById("option_order").value;
 		var order_id = x.split(",")[0];
     	var index = x.split(",")[1];
-	    document.getElementById("summary_"+index).style.visibility='visible';
+		for(var i = 0; i < total; i++) 
+		{
+			if(i != index)
+			{
+				document.getElementById("summary_"+i).style.display='none';
+			}
+		}
+    	document.getElementById("summary_"+index).style.display='block';
+	    //document.getElementById("summary_"+index).style.visibility='visible';
 	}
 	</script>
 

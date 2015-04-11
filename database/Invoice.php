@@ -3,11 +3,15 @@
 
 include_once 'database/Database.php';
 include_once 'database/Order.php';
+include_once 'database/Customer.php';
+include_once 'database/Balance.php';
 
 class Invoice {
 
-    /*
+    /**
      * insert new invoice details
+     * @param $order_id
+     * @param $_POST- info about the new invoice
      */
     public static function insertInvoice($order_id) {
         $db = new Database();
@@ -40,6 +44,10 @@ class Invoice {
         return $r;
     }
     
+    /**
+     * Edits invoice
+     * @param $_POST- contains the info of the order
+     */
     public static function editInvoice() {
     	$db = new Database();
     	$invoice_id = $_POST['invoice_id'];
@@ -65,8 +73,17 @@ class Invoice {
     	}
     }
     
+    /**
+     * Deletes an invoice by id
+     * @param int $invoice_id
+     */
     public static function deleteInvoice($invoice_id) {
     	$db = new Database();
+    	// Add to Balance as Debit
+    	$results = Invoice::getInvoiceRows($invoice_id);
+    	foreach ($results as $result) {
+    		Balance::insertBalanceWithParameters($result['P_ID'], $result['QUANTITY'], 'Debit');
+    	}
     	// Delete all rows
     	$q = "delete from invoice_rows where (invoice_id = :cinvoice_id)";
     	$stid = $db->parseQuery($q);
@@ -80,6 +97,11 @@ class Invoice {
     	oci_execute($stid); // delete header
     }
     
+    /**
+     * Find invoice by id
+     * @param int $order_id
+     * @return boolean
+     */
     public static function getInvoiceId($order_id) {
     	$db = new Database();
     	$q = "select * from invoice_header where order_id = '{$order_id}'";
@@ -91,21 +113,17 @@ class Invoice {
     	}
     }
     
-    /*
+    /**
      * Get all the invoices headers
      */
     public static function getInvoicesHeaders() {
     	$db = new Database();
     	$q = "select * from invoice_header order by order_id";
     	$result = $db->createQuery($q);
-    	if (count($result) > 0) {
-    		return $result;
-    	} else {
-    		return FALSE;
-    	}
+    	return $result;
     }
     
-    /*
+    /**
      * Get the invoice header
      */
     public static function getInvoiceHeader($invoice_id) {
@@ -119,31 +137,75 @@ class Invoice {
     	}
     }
     
-    /*
+    /**
+     * Search the invoice details depend on the input params
+     * @param int $invoice_id
+     * @param int $cust_id
+     * @param int $order_id
+     * @param String $start_date
+     * @param String $end_date
+     * @return Array of invoices
+     */
+    public static function getInvoiceDetails($invoice_id, $cust_id, $order_id, $start_date, $end_date, $first_name, $last_name) {
+    	$db = new Database();
+    	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name);
+
+    	if(count($customers) > 0) {
+	    	$cust_ids = "";
+	    	foreach ($customers as $index=>$customer) {
+	    		$cust_ids .= ($customer['CUST_ID'].',');
+	    	}
+	    	$cust_ids[strlen($cust_ids)-1] = "";
+    	} else {
+    		$cust_ids = "NULL";
+    	}
+    	
+    	// Get the right date format to insert
+    	$start = date("d/m/Y", strtotime($start_date));
+    	$end = date("d/m/Y", strtotime($end_date));
+    	
+	    $q = "select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.invoice_id='{$invoice_id}'
+		    UNION
+		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.cust_id='{$cust_id}'
+		    UNION
+		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.order_id='{$order_id}'
+		    UNION
+		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.order_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy')
+		    UNION
+		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where  i.cust_id=c.cust_id and i.cust_id IN ({$cust_ids})";
+	    $results = $db->createQuery($q);
+	    return $results;
+    }
+    
+    /**
      * Get the invoice rows
+     * @param $invoice_id 
+     * @return Array of invoices
      */
     public static function getInvoiceRows($invoice_id) {
     	$db = new Database();
     	$q = "select r.invoice_id, r.row_num, r.p_id, p.description, r.quantity, p.price, (r.quantity*p.price) as total from invoice_rows r, products p where r.p_id = p.p_id and r.invoice_id = '{$invoice_id}'";
     	$result = $db->createQuery($q);
-    	if (count($result) > 0) {
-    		return $result;
-    	} else {
-    		return FALSE;
-    	}
+    	return $result;
     }
     
+    /**
+     * Find the invoice date by id
+     * @param int $invoice_id
+     * @return Array of invoices
+     */
     public static function getInvoiceDate($invoice_id) {
     $db = new Database();
     	$q = "select TO_CHAR(ORDER_DATE, 'DD/MM/YYYY') AS ORDER_DATE from invoice_header where invoice_id = '{$invoice_id}'";
     	$result = $db->createQuery($q);
-    	if (count($result) > 0) {
-    		return $result;
-    	} else {
-    		return FALSE;
-    	}
+    	return $result;
     }
     
+    /**
+     * Calculate the total price of an invoice by id
+     * @param int $invoice_id
+     * @return int - the total price
+     */
     public static function getTotal($invoice_id) {
     	$db = new Database();
     	$q = "select sum(TOTAL) as total from (Select p.description, p.price, r.quantity, (P.PRICE*R.QUANTITY) as Total from invoice_rows r, products p where r.p_id = p.p_id and r.invoice_id = '{$invoice_id}')";
