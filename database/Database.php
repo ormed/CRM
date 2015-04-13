@@ -23,7 +23,10 @@ class Database {
 		// close connection
 	}
 	
-	// execute the query and return result
+	/**
+	 * execute the query and return result
+	 * @param String $q - the Query
+	 */ 
 	public function createQuery($q) {
 		$stid = oci_parse($this->_dbh, $q);
 		oci_execute($stid);

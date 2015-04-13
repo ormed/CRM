@@ -13,8 +13,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	$result = Order::editOrder();
 	if(strcmp($_POST['status'], 'Close') == 0) {
 		Invoice::insertInvoice($_POST['order_id']);
+		Balance::insertOrderBalanceWithParameters($_POST['order_id']);
 		Inventory::reduceQuantity();
-		Balance::insertBalance();
 		$url = "invoice.php?order_id=".$_POST['order_id']; // Create Invoice
 	} else {
 		$url = "all_orders.php"; // Return to all orders

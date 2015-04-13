@@ -8,7 +8,7 @@ include_once 'database/Balance.php';
 
 class Order {
 
-    /*
+    /**
      * function to check if form was submitted ok
      * return errors if found any
      */
@@ -30,23 +30,25 @@ class Order {
         return $err;
     } 
     
-    /*
+    /**
      * Insert new order 
      */
     public static function insertNewOrder() {
     	$db = new Database();
+    	debug($_POST);
     	$total_price = 0;
     	$headerResult = Order::insertHeader($db);
     	if($headerResult) { // Added new header
     		$order_id = Order::getLastAdded($db)[0]['LAST'];
     		$i = 1;
     		while(isset($_POST['desc'.$i])) { // Insert new rows to the new header
+    			$price = explode(",",$_POST['desc'.$i])[1];
     			$_POST['desc'.$i] = explode(",",$_POST['desc'.$i])[0];
     			$p_id = Products::getProductId($_POST['desc'.$i]);
      			$rowResult = Order::insertRow($i, $order_id, $p_id, $_POST['quantity'.$i], $db);
      			$total_price += ($_POST['price'.$i]*$_POST['quantity'.$i]);
-     			if(strcmp($_POST['status'], 'Close') == 0) { // Add to Balance if Close
-     				Balance::insertBalanceWithParameters($p_id, $_POST['quantity'.$i], 'Credit', $db);
+     			if(strcmp($_POST['status'], 'Close') == 0) { // Add to Balance if Closed order
+     				Balance::insertBalanceWithParameters($p_id, $_POST['quantity'.$i], $price,'Credit', $db);
      				Products::reduceQuantity($p_id, $_POST['quantity'.$i], $db);
      			}
     			$i++;
@@ -60,7 +62,7 @@ class Order {
     	return $total_price;
     }
     
-    /*
+    /**
      * Create new order header
      */
     public static function insertHeader($db) {
@@ -77,7 +79,7 @@ class Order {
         return $r;
     }
     
-    /*
+    /**
      * Close the order
      * Make status -> 'Close'
      */
@@ -88,7 +90,7 @@ class Order {
     	oci_execute($stid);  // executes and commits
     }
     
-    /*
+    /**
      * Create new  order row
      * @param $index - the row num
      */
@@ -213,6 +215,16 @@ class Order {
     	}
     }
     
+    /**
+     * Get the order details
+     * @param int $order_id
+     * @param int $cust_id
+     * @param Date $start_date
+     * @param Date $end_date
+     * @param String $first_name
+     * @param String $last_name
+     * @return array of orders
+     */
     public static function getOrdersDetails($order_id, $cust_id, $start_date, $end_date, $first_name, $last_name) {
     	$db = new Database();
     	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name);

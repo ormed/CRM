@@ -39,6 +39,13 @@ class Inventory {
 			oci_bind_by_name($stid, ':cquantity', $new_quantity);
 			oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
 			oci_execute($stid);  // executes and commits
+			
+			// if new_quantity < 10 -> Make an order to store -> Add Balance move
+			if($new_quantity < 10) {
+				$result = Products::getProductById($_POST['p_id_'.$i]);
+				Balance::insertBalanceWithParameters($p_id, ($new_quantity + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
+			}
+			
 			$i++;
 		}
 		

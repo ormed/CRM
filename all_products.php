@@ -1,6 +1,7 @@
 <?php 
 include_once 'connection/checkUser.php';
 include_once 'parts/header.php';
+include_once 'database/Products.php';
 ?>
 
 <body>
@@ -38,22 +39,23 @@ include_once 'parts/header.php';
                                             <th>#Product Id</th>
                                             <th>Description</th>
                                             <th>Price</th>
+                                            <th>Store Price</th>
+                                            <th>Profit Per Unit</th>
                                             <th>Quantity</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php 
-                                        
-                                        $q = "select p.p_id, p.description, p.price, i.quantity from products p, inventory i where p.p_id = i.p_id order by description";
-                                        $db = new Database();
-                                        $results = $db->createQuery($q);
+                                        $results = Products::getAllProducts();
                                         
                                         foreach ($results as $result) {
                                         	?>                 
                                     		<tr>
 												<td><?php echo($result["P_ID"]); ?></td>
 												<td><?php echo($result["DESCRIPTION"])?></td>
-												<td><?php echo($result["PRICE"])?></td>
+												<td><?php echo($result["PRICE"]."$")?></td>
+												<td><?php echo($result["STORE_PRICE"]."$")?></td>
+												<td><?php echo(($result["PRICE"]-$result["STORE_PRICE"])."$")?></td>
 												<td><?php echo($result["QUANTITY"])?></td>
 											</tr>
 										<?php 

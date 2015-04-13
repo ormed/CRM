@@ -28,8 +28,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <th>#Move Id</th>
                                             <th>Date</th>
                                             <th>Product</th>
-                                            <th>Price</th>
+                                            <th>Price Per Unit</th>
                                             <th>Quantity</th>
+                                            <th>Total</th>
                                             <th>Essence</th>
                                             <th>Balance</th>
                                         </tr>
@@ -39,11 +40,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         $start_date = $_POST['start_date'];
                                         $end_date = $_POST['end_date'];
                                         $results = Balance::getAllBalanceByDate($start_date, $end_date);
-                                        foreach ($results as $result) {
+                                        foreach ($results as $index=>$result) {
                                         	$move_date = Balance::getBalanceDate($result['MOVE_ID']);
                                         	$description = Products::getProductDesc($result['P_ID']);
-                                        	//debug($description);
-                                        	$price = Products::getProductPrice($result['P_ID']);
+                                        	$price = $result['PRICE'];
                                         	$balance = Balance::getTotalBalanceByDate($start_date, $end_date, $result['MOVE_ID']);
                                         	?>                 
                                     		<tr>
@@ -52,8 +52,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 												<td><?php echo($description)?></td>
 												<td><?php echo($price)?></td>
 												<td><?php echo($result['QUANTITY'])?></td>
+												<td><?php if(strcmp($result['ESSENCE'],"Credit") == 0){ echo("<font color='green'>".($result['QUANTITY']*$price)."$");} else{echo("<font color='red'>-".($result['QUANTITY']*$price)."$");} ?></font></td>
 												<td><?php echo($result['ESSENCE'])?></td>
-												<td><strong><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo($balance[0]['TOTAL'])?></strong></td>
+												<?php if($index == (count($results)-1)) { ?>
+												<td><h4><u><strong><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo($balance[0]['TOTAL']."$")?></font></strong></u></h4></td>
+												<?php } else { ?>
+												<td><strong><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo($balance[0]['TOTAL']."$")?></font></strong></td>
+												<?php } ?>
 											</tr>
 										<?php 
                                         }

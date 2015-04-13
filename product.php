@@ -10,7 +10,7 @@ $err = '';
 //Check if post back
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	// Check all input fields filled fine 
-	$err = Products::testNewProduct($_POST['desc'], $_POST['price'], $_POST['quantity']);
+	$err = Products::testNewProduct($_POST['desc'], $_POST['price'], $_POST['store_price'], $_POST['quantity']);
 }
 if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
 	if(isset($_POST['edit_product'])) {
@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
 	} else {
 		$desc = $_POST['desc'];
 	}
-	$result = Products::insertProduct($desc, $_POST['price'], $_POST['quantity']); // insert or update product
+	$result = Products::insertProduct($desc, $_POST['price'], $_POST['store_price'], $_POST['quantity']); // insert or update product
 	if($result) {
 		if(isset($_POST['new_product'])) {
 			// Popup added product succesfully
@@ -75,15 +75,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
                                     	
                                         <div class="form-group">
                                             <i class="fa fa-info-circle"></i> <label>Description</label>
-                                            <input class="form-control" name="desc" placeholder="Product Description" value='<?php if(isset($_POST['desc'])) echo ($_POST['desc']);?>'>
+                                            <input class="form-control" name="desc" placeholder="Product Description">
                                         </div>
                                         <div class="form-group">
                                             <i class="fa fa-usd"></i> <label>Price</label>
-                                            <input class="form-control" name="price" placeholder="Price" value='<?php if(isset($_POST['price'])) echo ($_POST['price']);?>' maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
+                                            <input class="form-control" name="price" placeholder="Price" maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
+                                        </div>
+                                        <div class="form-group">
+                                            <i class="fa fa-shopping-cart"></i> <label>Store Price</label>
+                                            <input class="form-control" name="store_price" placeholder="Store Price" maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
                                         </div>
                                         <div class="form-group">
                                             <i class="fa fa-cubes"></i> <label>Quantity</label>
-                                            <input class="form-control" name="quantity" placeholder="Quantity" value='<?php if(isset($_POST['quantity'])) echo ($_POST['quantity']);?>' maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                            <input class="form-control" name="quantity" placeholder="Quantity" maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                                         </div>
                                         
                                         <button type="submit" name="new_product" class="btn btn-success">New Product</button>
@@ -120,13 +124,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
                                             <i class="fa fa-info-circle"></i> <label>Description</label>
                                             <select id="option_desc" name="desc" class="form-control" style="width:200px" onchange="showDetails()">
 				                            <?php foreach ($results as $result) { ?>
-				                            <option value='<?php echo($result["DESCRIPTION"].",".$result['PRICE'].",".$result['QUANTITY']);?>'><?php echo($result["DESCRIPTION"]);?></option>
+				                            <option value='<?php echo($result["DESCRIPTION"].",".$result['PRICE'].",".$result['STORE_PRICE'].",".$result['QUANTITY']);?>'><?php echo($result["DESCRIPTION"]);?></option>
 				                            <?php } ?>
 				                            </select>
                                         </div>
                                         <div class="form-group">
                                             <i class="fa fa-usd"></i> <label>Price</label>
                                             <input class="form-control" id='edit_price' name="price" placeholder='Edit Price' value='<?php echo $results[0]['PRICE'];?>' maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
+                                        </div>
+                                        <div class="form-group">
+                                            <i class="fa fa-shopping-cart"></i> <label>Store Price</label>
+                                            <input class="form-control" id='edit_store_price' name="store_price" placeholder='Edit Store Price' value='<?php echo $results[0]['STORE_PRICE'];?>' maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
                                         </div>
                                         <div class="form-group">
                                             <i class="fa fa-cubes"></i> <label>Quantity</label>
@@ -156,8 +164,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
     	{
     		var x = document.getElementById("option_desc").value;
         	var price = x.split(",")[1];
-    		var quantity = x.split(",")[2];
+    		var store_price = x.split(",")[2];
+    		var quantity = x.split(",")[3];
     	    document.getElementById("edit_price").value = price;
+    	    document.getElementById("edit_store_price").value = store_price;
     	    document.getElementById("edit_quantity").value = quantity;
     	}
     </script>
