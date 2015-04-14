@@ -35,20 +35,20 @@ class Order {
      */
     public static function insertNewOrder() {
     	$db = new Database();
-    	debug($_POST);
+
     	$total_price = 0;
     	$headerResult = Order::insertHeader($db);
     	if($headerResult) { // Added new header
     		$order_id = Order::getLastAdded($db)[0]['LAST'];
     		$i = 1;
+    		debug($_POST);
     		while(isset($_POST['desc'.$i])) { // Insert new rows to the new header
     			$price = explode(",",$_POST['desc'.$i])[1];
     			$_POST['desc'.$i] = explode(",",$_POST['desc'.$i])[0];
     			$p_id = Products::getProductId($_POST['desc'.$i]);
      			$rowResult = Order::insertRow($i, $order_id, $p_id, $_POST['quantity'.$i], $db);
-     			$total_price += ($_POST['price'.$i]*$_POST['quantity'.$i]);
      			if(strcmp($_POST['status'], 'Close') == 0) { // Add to Balance if Closed order
-     				Balance::insertBalanceWithParameters($p_id, $_POST['quantity'.$i], $price,'Credit', $db);
+     				Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], $_POST['quantity'.$i], $price,'Credit', $db);
      				Products::reduceQuantity($p_id, $_POST['quantity'.$i], $db);
      			}
     			$i++;
@@ -59,7 +59,6 @@ class Order {
     	} else { // Error in adding new header
     		return FALSE;
     	}
-    	return $total_price;
     }
     
     /**
@@ -188,8 +187,7 @@ class Order {
      * @param int $order_id
      * @return an array of the order header if found or FALSE otherwise
      */
-    public static function getOrderHeader($order_id) {
-    	$db = new Database();
+    public static function getOrderHeader($order_id, $db) {
     	$q = "select * from orders_header where order_id='{$order_id}'";
     	$result = $db->createQuery($q);
     	if (count($result) > 0) {
@@ -204,8 +202,7 @@ class Order {
      * @param int $order_id
      * @return array of order rows if found or FALSE otherwise
      */
-    public static function getOrderRows($order_id) {
-    	$db = new Database();
+    public static function getOrderRows($order_id, $db) {
     	$q = "select p.p_id, p.description, p.price, r.quantity, (P.PRICE*R.QUANTITY) as Total from orders_rows r, products p where r.p_id = p.p_id and r.order_id = '{$order_id}'";
     	$result = $db->createQuery($q);
     	if (count($result) > 0) {
@@ -227,8 +224,9 @@ class Order {
      */
     public static function getOrdersDetails($order_id, $cust_id, $start_date, $end_date, $first_name, $last_name) {
     	$db = new Database();
-    	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name);
     	
+    	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name, $db);
+
     	if(count($customers) > 0) {
     		$cust_ids = "";
     		foreach ($customers as $index=>$customer) {
@@ -259,8 +257,7 @@ class Order {
      * @param int $order_id
      * @return the total price of the order
      */
-    public static function getTotal($order_id) {
-    	$db = new Database();
+    public static function getTotal($order_id, $db) {
     	$q = "select sum(TOTAL) as total from (Select p.description, p.price, r.quantity, (P.PRICE*R.QUANTITY) as Total from orders_rows r, products p where r.p_id = p.p_id and r.order_id = '{$order_id}')";
     	$total = $db->createQuery($q);
     	if(count($total) == 0) {
@@ -274,8 +271,7 @@ class Order {
      * @param int $order_id
      * @return String of the order's date
      */
-    public static function getOrderDate($order_id) {
-    	$db = new Database();
+    public static function getOrderDate($order_id, $db) {
     	$q = "select TO_CHAR(ORDER_DATE, 'DD/MM/YYYY') AS ORDER_DATE from ORDERS_HEADER where order_id = '{$order_id}'";
     	$result = $db->createQuery($q);
     	return $result;
@@ -285,8 +281,7 @@ class Order {
      * Find all orders headers
      * @return array of headers
      */
-    public static function getOrdersHeader() {
-    	$db = new Database();
+    public static function getOrdersHeader($db) {
     	$q = "select * from orders_header order by order_id";
     	$result = $db->createQuery($q);
     	return $result;
@@ -296,8 +291,7 @@ class Order {
      * Find all Open orders headers
      * @return array of headers
      */
-    public static function getOpenOrdersHeader() {
-    	$db = new Database();
+    public static function getOpenOrdersHeader($db) {
     	$q = "select * from orders_header where status='Open' order by order_id";
     	$result = $db->createQuery($q);
     	return $result;

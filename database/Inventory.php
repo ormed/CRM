@@ -30,6 +30,7 @@ class Inventory {
 	public static function reduceQuantity() {
 		$db = new Database();
 		$i = 0;
+		debug($_POST);
 		while(isset($_POST['quantity_'.$i])) {
 			$current_quantity = Inventory::getMaxQuantity($_POST['p_id_'.$i]);
 			$new_quantity = $current_quantity - $_POST['quantity_'.$i];
@@ -43,7 +44,7 @@ class Inventory {
 			// if new_quantity < 10 -> Make an order to store -> Add Balance move
 			if($new_quantity < 10) {
 				$result = Products::getProductById($_POST['p_id_'.$i]);
-				Balance::insertBalanceWithParameters($p_id, ($new_quantity + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
+				Balance::insertBalanceWithParameters($_POST['p_id_'.$i], $_SESSION['id'], ($new_quantity + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
 			}
 			
 			$i++;

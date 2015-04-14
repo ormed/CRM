@@ -25,13 +25,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <!-- /.row -->
        
        <?php 
-	      	$invoices_headers = Invoice::getInvoicesHeaders();
+       		$db = new Database();
+	      	$invoices_headers = Invoice::getInvoicesHeaders($db);
 
 			foreach ($invoices_headers as $invoice) {
-       			$invoice_rows = Invoice::getInvoiceRows($invoice['INVOICE_ID']);
-             	$cust = Customer::getCustomerById($invoice['CUST_ID']);
-             	$invoice_date = Invoice::getInvoiceDate($invoice['INVOICE_ID']);
-             	$total = Invoice::getTotal($invoice['INVOICE_ID']);
+       			$invoice_rows = Invoice::getInvoiceRows($invoice['INVOICE_ID'], $db);
+             	$cust = Customer::getCustomerById($invoice['CUST_ID'], $db);
+             	$invoice_date = Invoice::getInvoiceDate($invoice['INVOICE_ID'], $db);
+             	$total = Invoice::getTotal($invoice['INVOICE_ID'], $db);
        ?>
 <div class="container">
     <div class="row">

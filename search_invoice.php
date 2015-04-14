@@ -1,6 +1,7 @@
 <?php 
 include_once 'connection/checkUser.php';
 include_once 'parts/header.php';
+include_once 'database/Database.php';
 include_once 'database/Invoice.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

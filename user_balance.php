@@ -4,10 +4,6 @@ include_once 'parts/header.php';
 include_once 'database/Balance.php';
 include_once 'database/Products.php';
 include_once 'database/User.php';
-
-
-	$db = new Database();
-	$results = Balance::getBalance($db);
 ?>
 
 <body>
@@ -15,6 +11,11 @@ include_once 'database/User.php';
 	<div id="wrapper">
 
         <?php include_once 'parts/nav.php';?>
+        
+        <?php 
+	       $db = new Database();
+	       $results = Balance::getBalanceBySeller($_SESSION['id'], $db);
+       	?>  
 
         <!-- Page Content -->
 		<div id="page-wrapper">
@@ -24,7 +25,7 @@ include_once 'database/User.php';
 			
 				<div class="row">
 					<div class="col-lg-12">
-						<h1 class="page-header">Balance</h1>
+						<h1 class="page-header"><?php echo ($_SESSION['user']);?> Balance</h1>
 					</div>
 					<!-- /.col-lg-12 -->
 				</div>
@@ -34,7 +35,7 @@ include_once 'database/User.php';
 				</div>
 				
 				<input type="button" id='graph_button' class="btn btn-info" value="Show Graph" onClick='drawBasic(<?php echo count($results);?>)'/>
-				
+
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             Moves
@@ -46,7 +47,6 @@ include_once 'database/User.php';
                                     <thead>
                                         <tr>
                                             <th>#Move Id</th>
-                                            <th>Seller</th>
                                             <th>Date</th>
                                             <th>Product</th>
                                             <th>Price Per Unit</th>
@@ -56,22 +56,20 @@ include_once 'database/User.php';
                                             <th>Balance</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <?php 
-                                        foreach ($results as $index=>$result) {
-                                        	$move_date = Balance::getBalanceDate($result['MOVE_ID'], $db);
-                                        	$seller = User::getUsername($result['USER_ID']);
-                                        	$description = Products::getProductDesc($result['P_ID'], $db);
-											$price = $result['PRICE'];
-                                        	$balance = Balance::getTotalBalance($result['MOVE_ID'], $db);
-                                        	?>                 
-                                        		
-                                        		<input type="hidden" id='hidden_balance_<?php echo $index?>' value='<?php echo $balance[0]['TOTAL']?>'/>
+                                    <tbody>           
+                                    		<tr>
+                                    		<?php 
+                                    			foreach ($results as $index=>$result) {
+											       $move_date = Balance::getBalanceDate($result['MOVE_ID'], $db);
+											       $description = Products::getProductDesc($result['P_ID'], $db);
+												   $price = $result['PRICE'];
+											       $balance = Balance::getTotalBalanceBySeller($_SESSION['id'], $result['MOVE_ID'], $db);
+											?>
+																								
+												<input type="hidden" id='hidden_balance_<?php echo $index?>' value='<?php echo $balance[0]['TOTAL']?>'/>
 												<input type="hidden" id='hidden_date_<?php echo $index?>' value='<?php echo($move_date[0]['MOVE_DATE'])?>'/>
 												
-                                    		<tr>
 												<td><?php echo($result['MOVE_ID']); ?></td>
-												<td><?php echo($seller); ?></td>
 												<td><?php echo($move_date[0]['MOVE_DATE'])?></td>
 												<td><?php echo($description)?></td>
 												<td><?php echo($price)?></td>
@@ -82,6 +80,7 @@ include_once 'database/User.php';
 												<td><h4><u><strong><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo(number_format($balance[0]['TOTAL'], 1, '.', ',')."$")?></font></strong></u></h4></td>
 												<?php } else { ?>
 												<td><strong><?php if($balance[0]['TOTAL'] > 0){ echo "<font color='green'>";} else{ echo "<font color='red'>";} echo(number_format($balance[0]['TOTAL'], 1, '.', ',')."$")?></font></strong></td>
+												
 												<?php } ?>
 											</tr>
 										<?php 

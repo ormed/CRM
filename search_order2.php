@@ -2,28 +2,14 @@
 include_once 'connection/checkUser.php';
 include_once 'parts/header.php';
 include_once 'database/Order.php';
-include_once 'database/Products.php';
-include_once 'database/Inventory.php';
 
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
-	$order_id = substr($_POST['order_id'], 0, strpos($_POST['order_id'], ','));
-	header("Location: edit_order.php?order_id=".$order_id);
-}
-?>
-
-<body>
-
-	<div id="wrapper">
-
-        <?php include_once 'parts/nav.php';?>
-
-        <!-- Page Content -->
-		<div id="page-wrapper">
-
-			<div class="container-fluid">
-			
-			
-				<div class="row">
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+	include_once 'parts/body_header.php';
+	
+	$db = new Database();
+	$results = Order::getOrdersDetails($_POST['order_id'], $_POST['cust_id'], $_POST['start_date'], $_POST['end_date'], $_POST['first_name'], $_POST['last_name']);
+	?>
+	<div class="row">
 					<div class="col-lg-12">
 						<h1 class="page-header">Edit Order Menu</h1>
 					</div>
@@ -40,25 +26,16 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="row">
                                 <div class="col-lg-6">
                                     <form role="form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
-                                    	
-                                    	<?php 
-                                    		$db = new Database();
-			                            	$orders_headers = Order::getOpenOrdersHeader($db);
-			                            ?>
-                                    	
                                         <div class="form-group">
                                             <i class="fa fa-info-circle"></i> <label>Order Id</label>
-                                            <select id="option_order" name="order_id" onchange="showDetails(<?php echo count($orders_headers);?>);" class="form-control" style="width:200px">
-				                            <?php foreach ($orders_headers as $index=>$order) { 
-				                            		if(strcmp($order['STATUS'], "Open") == 0) {
-				                            ?>
+                                            <select id="option_order" name="order_id" onchange="showDetails(<?php echo count($results);?>);" class="form-control" style="width:200px">
+				                            <?php foreach ($results as $index=>$order) { ?>
 				                            <option value='<?php echo($order['ORDER_ID'].",".$index)?>'><?php echo($order['ORDER_ID'])?></option>
-				                            <?php 	} } ?>
+				                            <?php }?>
 				                            </select>
 				                           
 				                            
-				                            <?php foreach ($orders_headers as $order_index=>$order) { 
-				                            		if(strcmp($order['STATUS'], "Open") == 0) {
+				                            <?php foreach ($results as $order_index=>$order) { 
 				                            			$rows = Order::getOrderRows($order['ORDER_ID'], $db);
 				                            			$total = Order::getTotal($order['ORDER_ID'], $db)[0]['TOTAL'];
 				                            ?>
@@ -119,8 +96,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 										    </div>
 				                            
 				                            
-				                           <?php } }?>
-				                         <button type="submit" class="btn btn-success">Edit</button>  
+				                           <?php }?>
+				                         <button type="submit" class="btn btn-success">Edit</button>
+				                         <button type="reset" class="btn btn-primary">Back</button>   
                                         </div>
 
                                     </form>
@@ -130,18 +108,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
                         <!-- /.panel-body -->
                     </div>
-
-
-			</div>
-			<!-- /.container-fluid -->
-		</div>
-		<!-- /#page-wrapper -->
-
-	</div>
-	<!-- /#wrapper -->
-	
-	
-	<script>
+                    
+    <script>
 	function showDetails(total) 
 	{
 		var x = document.getElementById("option_order").value;
@@ -157,9 +125,86 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     	document.getElementById("summary_"+index).style.display='block';
 	}
 	</script>
+	<?php 
+	
+	include_once 'parts/body_footer.php';
+} else {
+?>
+
+<body>
+
+	<div id="wrapper">
+
+        <?php include_once 'parts/nav.php';?>
+
+        <!-- Page Content -->
+		<div id="page-wrapper">
+
+			<div class="container-fluid">
+			
+			
+				<div class="row">
+					<div class="col-lg-12">
+						<h1 class="page-header">Search Orders</h1>
+					</div>
+					<!-- /.col-lg-12 -->
+				</div>
+				</br>
+				<!-- /.row -->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Search
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                        	<form role="form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
+	                        	<div class="form-group">
+	                            	<i class="fa fa-caret-right"></i> <label>Order Id</label>
+	                            	<input class="form-control" name="order_id" style="width:200px" maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57'>
+	                            </div>
+	                            <div class="form-group">
+	                            	<i class="fa fa-caret-right"></i> <label>Customer Id</label>
+	                            	<input class="form-control" name="cust_id" style="width:200px">
+	                            </div>
+	                            <div class="form-group">
+	                            	<i class="fa fa-caret-right"></i> <label>Customer First Name</label>
+	                            	<input class="form-control" name="first_name" style="width:200px">
+	                            </div>
+	                            <div class="form-group">
+	                            	<i class="fa fa-caret-right"></i> <label>Customer Last Name</label>
+	                            	<input class="form-control" name="last_name" style="width:200px">
+	                            </div>
+	                             <div class="form-group">
+	                            	<i class="fa fa-caret-right"></i> <label>Start Date</label>
+	                            	<input class="form-control" name="start_date" style="width:200px" type="date" value=<?php echo date("Y-m-d")?>/>
+	                            </div>
+	                            <div class="form-group">
+	                            	<i class="fa fa-caret-right"></i> <label>End Date</label>
+	                            	<input class="form-control" name="end_date" style="width:200px" type="date" value=<?php echo date("Y-m-d")?>/>
+	                            </div>
+	                            
+	                            <button type="submit" class="btn btn-success">Search</button>
+                                <button type="reset" class="btn btn-warning">Reset</button>
+	                     	</form>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+
+
+			</div>
+			<!-- /.container-fluid -->
+		</div>
+		<!-- /#page-wrapper -->
+
+	</div>
+	<!-- /#wrapper -->
 
     
-<?php include_once 'parts/bottom.php';?>
+<?php 
+}
+include_once 'parts/bottom.php';
+?>
 
 </body>
 

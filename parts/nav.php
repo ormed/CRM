@@ -19,8 +19,9 @@
                     </a>
                     <ul class="dropdown-menu dropdown-user">
                         <li><a href="user_info.php"><i class="fa fa-user fa-fw"></i> User Profile</a>
-                        <li><a href="balance.php"><i class="fa fa-line-chart"></i> Balance</a>
+                        <li><a href="balance.php"><i class="fa fa-line-chart"></i> All Balance</a>
                         <li><a href="date_balance.php"><i class="fa fa-calendar"></i> Balance by Date</a>
+                        <li><a href="user_balance.php"><i class="fa fa-usd"></i></i> My Sellings</a>
                         <li class="divider"></li>
                         <li><a href="logout.php"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
                         </li>

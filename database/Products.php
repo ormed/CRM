@@ -94,14 +94,14 @@ class Products {
     		// Insert balance move - Debit/Credit - by the change in the inventory
     		if($new_quantity > $old_quantity) { // Debit
     			$change = ($new_quantity - $old_quantity);
-    			Balance::insertBalanceWithParameters($p_id, $change, $store_price, 'Debit', $db);
+    			Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], $change, $store_price, 'Debit', $db);
     		} elseif($new_quantity < $old_quantity) { // Credit
     			$change = ($old_quantity - $new_quantity);
-    			Balance::insertBalanceWithParameters($p_id, $change, $store_price, 'Credit', $db);
+    			Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], $change, $store_price, 'Credit', $db);
     		}
     	} else { // Insert balance move - Debit - by the quantity
     		$new_quantity = Inventory::getMaxQuantity($p_id);
-    		Balance::insertBalanceWithParameters($p_id, $new_quantity, $store_price, 'Debit', $db);
+    		Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], $new_quantity, $store_price, 'Debit', $db);
     	}
     	
     	return $r*$inv; // if has error returns FALSE
@@ -128,8 +128,7 @@ class Products {
      * @param $p_id- the product id
      * @return a string of the product description if found or FALSE otherwise
      */
-    public static function getProductDesc($p_id) {
-    	$db = new Database();
+    public static function getProductDesc($p_id, $db) {
     	$q = "select description from products where p_id='{$p_id}'";
     	$result = $db->createQuery($q);
     	if (count($result) > 0) {
@@ -174,7 +173,7 @@ class Products {
     	
     	// if new_quantity < 10 -> Make an order to store -> Add Balance move
     	if($new_quantity < 10) {
-    		Balance::insertBalanceWithParameters($p_id, 10, $result[0]['STORE_PRICE'], 'Debit', $db);
+    		Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], 10, $result[0]['STORE_PRICE'], 'Debit', $db);
     	} 
     }
     

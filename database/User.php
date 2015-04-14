@@ -54,7 +54,7 @@ class User {
                 //before insert the new user check if password match
                 if ($_POST['pass'] != $_POST['cpass']) {
                     $err = "Password does not match!";
-                } elseif (($string != $userstring) || (strlen($string) <= 4)) {
+                } elseif (strcmp($string, $userstring) != 0 || (strlen($string) <= 4)) {
                     $err = "Please enter the code in the image again";
                 } 
             } else {
@@ -92,7 +92,6 @@ class User {
         $last_name = cleanInput($_POST['last_name']);
         $username = cleanInput($_POST['user']);
         $password = password_hash($_POST['pass'], PASSWORD_BCRYPT);
-        
         return User::insertUser($username, $password, $first_name, $last_name);
     }
 
@@ -125,6 +124,22 @@ class User {
         } else {
             return FALSE;
         }
+    }
+    
+    /**
+     * get username from database
+     * return false if was not found
+     * @param - $user_id - the user id to find
+     */
+    public static function getUsername($user_id) {
+    	$db = new Database();
+    	$q = "SELECT username FROM users WHERE user_id='{$user_id}'";
+    	$result = $db->createQuery($q);
+    	if (count($result) > 0) {
+    		return $result[0]['USERNAME'];
+    	} else {
+    		return FALSE;
+    	}
     }
     
     /**

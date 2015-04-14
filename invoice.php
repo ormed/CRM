@@ -16,12 +16,13 @@ if (!isset($_GET['invoice_id'])) {
 	header("Location: all_invoices.php");
 }
 
+$db = new Database();
 $invoice_id = $_GET['invoice_id'];
 $invoice = Invoice::getInvoiceHeader($invoice_id);
-$rows = Invoice::getInvoiceRows($invoice_id);
-$cust = Customer::getCustomerById($invoice[0]['CUST_ID']);
-$invoice_date = Invoice::getInvoiceDate($invoice_id);	
-$total = Invoice::getTotal($invoice_id);
+$rows = Invoice::getInvoiceRows($invoice_id, $db);
+$cust = Customer::getCustomerById($invoice[0]['CUST_ID'], $db);
+$invoice_date = Invoice::getInvoiceDate($invoice_id, $db);	
+$total = Invoice::getTotal($invoice_id, $db);
 if (!$invoice) {
 	header("Location: all_invoices.php");
 }	

@@ -86,18 +86,20 @@ include_once 'parts/header.php';?>
                                         		</div>
                                         		<div>
                                         			Description: <select id="desc1" name="desc1" class="form-control" style="width:200px" onchange="showPrice(1)">
-                                                				<?php foreach ($results as $result) { ?>
-                                                				<option value='<?php echo($result['DESCRIPTION'].",".$result['PRICE']);?>'><?php echo($result["DESCRIPTION"]);?></option>
+                                                				<?php foreach ($results as $result) {
+                                                				?>
+                                                				<option value='<?php echo($result['DESCRIPTION'].",".$result['PRICE'].",".$result['QUANTITY']);?>'><?php echo($result["DESCRIPTION"]);?></option>
                                                 				<?php } ?>
                                            					 </select>
                                         		</div>
                                         		<div>
                                             		<i class="fa fa-usd"></i> <label>Price</label>
-                                            		<input class="form-control" id='price1' name="price1" style="width:200px" placeholder='Price' value='<?php echo $results[0]['PRICE'];?>' maxlength="10" onkeypress='return event.charCode >= 46 && event.charCode <= 57' disabled>
+                                            		<input class="form-control" id='price1' name="price1" style="width:200px" placeholder='Price' value='<?php echo $results[0]['PRICE'];?>' disabled>
                                         		</div>
                                         		<div>
                                             		<i class="fa fa-cubes"></i> <label>Quantity</label>
                                             		<input class="form-control" id='quantity1' name="quantity1" style="width:200px" placeholder='Quantity' maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                            		<label>Max:</label> <input class="form-control" id='max_quantity1' style="width:200px" placeholder='Max Quantity' value='<?php echo ($results[0]['QUANTITY']);?>' disabled>
                                       			</div>
                                         		
                                         		<div id="more-items"></div>
@@ -149,7 +151,7 @@ function addItemToDiv(i)
 //		document.getElementById("plus-items").className = "btn btn-danger btn-xs";
 //	} else {
 	var div = document.createElement('div');
-	div.innerHTML = "<i class='fa fa-cube'></i> <label>Item #"+i+"</label></div><div>Description: <select id='desc"+i+"' name='desc"+i+"' class='form-control' style='width:200px' onchange='showPrice("+i+")'><?php foreach ($results as $result) { ?><option value='<?php echo($result['DESCRIPTION'].",".$result['PRICE']);?>'><?php echo($result["DESCRIPTION"]);?></option><?php } ?></select></div> <div><i class='fa fa-usd'></i> <label>Price</label><input class='form-control' id='price"+i+"' name='price"+i+"' style='width:200px' placeholder='Price' value='<?php echo $results[0]['PRICE'];?>' maxlength='10' onkeypress='return event.charCode >= 46 && event.charCode <= 57' disabled></div><div><i class='fa fa-cubes'></i> <label>Quantity</label><input class='form-control' id='quantity"+i+"' name='quantity"+i+"' style='width:200px' placeholder='Quantity' maxlength='5' onkeypress='return event.charCode >= 48 && event.charCode <= 57'>";
+	div.innerHTML = "<i class='fa fa-cube'></i> <label>Item #"+i+"</label></div><div>Description: <select id='desc"+i+"' name='desc"+i+"' class='form-control' style='width:200px' onchange='showPrice("+i+")'><?php foreach ($results as $result) { ?><option value='<?php echo($result['DESCRIPTION'].",".$result['PRICE'].",".$result['QUANTITY']);?>'><?php echo($result["DESCRIPTION"]);?></option><?php } ?></select></div> <div><i class='fa fa-usd'></i> <label>Price</label><input class='form-control' id='price"+i+"' name='price"+i+"' style='width:200px' placeholder='Price' value='<?php echo $results[0]['PRICE'];?>' maxlength='10' onkeypress='return event.charCode >= 46 && event.charCode <= 57' disabled></div><div><i class='fa fa-cubes'></i> <label>Quantity</label><input class='form-control' id='quantity"+i+"' name='quantity"+i+"' style='width:200px' placeholder='Quantity' maxlength='5' onkeypress='return event.charCode >= 48 && event.charCode <= 57'> <label>Max:</label><input class='form-control' id='max_quantity"+i+"' style='width:200px' placeholder='Max Quantity' value='<?php echo ($results[0]['QUANTITY']);?>' disabled>";
 	document.getElementById('more-items').appendChild(div);
 // 	}
 }
@@ -157,7 +159,9 @@ function addItemToDiv(i)
 function showPrice(i) 
 {
 	var price = document.getElementById("desc"+i).value.split(",")[1];
+	var max_quantity = document.getElementById("desc"+i).value.split(",")[2];
 	document.getElementById("price"+i).value = price;
+	document.getElementById("max_quantity"+i).value = max_quantity;
 }
 </script>
 <?php 

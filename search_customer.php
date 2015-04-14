@@ -1,12 +1,14 @@
 <?php 
 include_once 'connection/checkUser.php';
 include_once 'parts/header.php';
+include_once 'database/Database.php';
 include_once 'database/Customer.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	include_once 'parts/body_header.php';
 
-	$results = Customer::getCustomersDetails($_POST['cust_id'], $_POST['first_name'], $_POST['last_name']);
+	$db = new Database();
+	$results = Customer::getCustomersDetails($_POST['cust_id'], $_POST['first_name'], $_POST['last_name'], $db);
 	?>
 	<div class="row">
 					<div class="col-lg-12">

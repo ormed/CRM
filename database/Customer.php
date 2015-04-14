@@ -32,25 +32,33 @@ class Customer {
      * @param $id - the customer number
      * @return customers details
      */
-    public static function getCustomerById($id) {
-        $db = new Database();
+    public static function getCustomerById($id, $db) {
         $q = "select * from customers where cust_id='{$id}'";
         $result = $db->createQuery($q);
        	return $result;
     }
-    
+
     /**
      * get customer details by last name
      * @param $last_name
      * @return customers details
      */
-    public static function getCustomersDetails($cust_id, $first_name, $last_name) {
-    	$db = new Database();
-    	$q = "select * from customers where cust_id='{$cust_id}' 
-    		  UNION 
-    		  select * from customers where Initcap(first_name) like Initcap('{$first_name}')
-    		  UNION 
-    		  select * from customers where Initcap(last_name) like Initcap('{$last_name}')";
+    public static function getCustomersDetails($cust_id, $first_name, $last_name, $db) {   	
+    	if(!empty($cust_id) && empty($first_name) && empty($last_name)) { // Only cust id inserted
+    		$q = "select * from customers where cust_id='{$cust_id}'";
+    	} elseif(empty($cust_id) && !empty($first_name) && empty($last_name)) { // Only first name inserted
+    		$q = "select * from customers where Initcap(first_name) like Initcap('{$first_name}')";
+    	} elseif(empty($cust_id) && empty($first_name) && !empty($last_name)) { // Only last name inserted
+    		$q = "select * from customers where Initcap(last_name) like Initcap('{$last_name}')";
+    	} elseif(!empty($cust_id) && !empty($first_name) && empty($last_name)) { // Only cust_id & first_name inserted
+    		$q = "select * from customers where cust_id='{$cust_id}' or Initcap(first_name) like Initcap('{$first_name}')";
+    	} elseif(!empty($cust_id) && empty($first_name) && !empty($last_name)) { // Only cust_id & last_name inserted
+    		$q = "select * from customers where cust_id='{$cust_id}' or Initcap(last_name) like Initcap('{$last_name}')";
+    	} elseif(empty($cust_id) && !empty($first_name) && !empty($last_name)) { // Only first_name & last_name inserted
+    		$q = "select * from customers where Initcap(first_name) like Initcap('{$first_name}') and Initcap(last_name) like Initcap('{$last_name}')";
+    	} elseif(!empty($cust_id) && !empty($first_name) && !empty($last_name)) { // Inserted all
+    		$q = "select * from customers where cust_id='{$cust_id}' or (Initcap(first_name) like Initcap('{$first_name}') and Initcap(last_name) like Initcap('{$last_name}'))";
+    	}
     	$result = $db->createQuery($q);
     	return $result;
     }

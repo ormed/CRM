@@ -28,13 +28,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <!-- /.row -->
        
        <?php 
-	      	$orders_header = Order::getOrdersHeader();
+       		$db = new Database();
+	      	$orders_header = Order::getOrdersHeader($db);
 	      	
 			foreach ($orders_header as $order) {
-       			$orders_rows = Order::getOrderRows($order['ORDER_ID']);
-             	$cust = Customer::getCustomerById($order['CUST_ID']);
-             	$order_date = Order::getOrderDate($order['ORDER_ID']);
-             	$total = Order::getTotal($order['ORDER_ID'])[0]['TOTAL'];
+       			$orders_rows = Order::getOrderRows($order['ORDER_ID'], $db);
+             	$cust = Customer::getCustomerById($order['CUST_ID'], $db);
+             	$order_date = Order::getOrderDate($order['ORDER_ID'], $db);
+             	$total = Order::getTotal($order['ORDER_ID'], $db)[0]['TOTAL'];
        ?>
 <div class="container">
     <div class="row">

@@ -11,6 +11,8 @@ require_once 'database/User.php';
 
 $err='';
 
+debug($_SESSION['string']);
+
 //check if postback
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $err = User::testSignUp();
@@ -19,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && empty($err)) {
 	$result = User::newUser();
 	if($result) {
 		$message = "Registration was completed! Login Please";
-		$url = "login.php";
+		$url = "index.php";
 	} else {
 		$message = "Error in signup!";
 		$url = "signup.php";

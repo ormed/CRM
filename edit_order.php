@@ -25,12 +25,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (!isset($_GET['order_id'])) {
 	header("Location: all_orders.php");
 } else {
+	$db = new Database();
 	$order_id = $_GET['order_id'];
-	$order = Order::getOrderHeader($order_id);
-	$rows = Order::getOrderRows($order_id);
-	$cust = Customer::getCustomerById($order[0]['CUST_ID']);
-	$order_date = Order::getOrderDate($order_id);	
-	$total = Order::getTotal($order_id)[0]['TOTAL'];
+	$order = Order::getOrderHeader($order_id, $db);
+	$rows = Order::getOrderRows($order_id, $db);
+	$cust = Customer::getCustomerById($order[0]['CUST_ID'], $db);
+	$order_date = Order::getOrderDate($order_id, $db);	
+	$total = Order::getTotal($order_id, $db)[0]['TOTAL'];
 	$status = $order[0]['STATUS'];
 	if (!$order) {
 		header("Location: all_orders.php");
@@ -79,16 +80,17 @@ if (!isset($_GET['order_id'])) {
                        				<div class="panel-heading">Order Details</div>
                        				<div class="panel-body">
                        					<div class="row">
+                       						<?php if(strcmp($status, "Open") == 0) { ?>
   											<div class="col-xs-5 col-md-3"><strong>Status:</strong></div>
   											<div class="col-xs-3 col-md-3">
-  											
-  											<?php if(strcmp($status, "Open") == 0) { ?>
   												<select name="status" class="form-control" style="width: 90px">
                                						<option selected>Open</option>
                                						<option>Close</option>
                                					</select>
-                               				<?php } else { echo ($order_date[0]['ORDER_DATE']); }?>
                                				</div>
+                               				<?php } else { ?>
+                               				<div class="col-xs-5 col-md-5"><strong>Status:</strong> Close</div>
+                               				<?php } ?>
 										</div>
                            				<strong>Date:</strong> <?php echo $order_date[0]['ORDER_DATE']?>
                                		</div>

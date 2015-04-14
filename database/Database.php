@@ -1,4 +1,5 @@
 <?php
+include_once 'help_functions.php';
 class Database {
 	private $_username = 'HR';
 	private $_password = 'oracle';
@@ -18,6 +19,7 @@ class Database {
 
 		}
 	}
+	
 	public function __destruct() {
 		oci_close($this->_dbh);
 		// close connection
