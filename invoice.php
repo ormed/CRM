@@ -120,7 +120,6 @@ if (!$invoice) {
                                     <td class="text-center">
                                     	<button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
                                     	 <span id='quantity_<?php echo $index?>'><?php echo $row['QUANTITY']?></span> 
-                                    	 <button type="button" class="btn btn-success btn-xs" onclick="increase(<?php echo $index.",".$max_quantity?>);"><i class="fa fa-plus"></i></button>
                                     	 <input type="hidden" id='hidden_quantity_<?php echo $index?>' name='quantity_<?php echo $index?>' value='<?php echo $row['QUANTITY']?>'>
                                    	</td>
                                     <td class="text-right">

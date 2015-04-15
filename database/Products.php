@@ -76,9 +76,7 @@ class Products {
     	}
     	
     	
-    	$q = "merge into products d using (SELECT :cdesc description, :cprice price, :cstore_price store_price from dual) s ON (d.description = s.description) 
-    			WHEN MATCHED THEN UPDATE SET d.price = s.price, d.store_price = s.store_price
-    			WHEN NOT MATCHED THEN INSERT (description, price, store_price) VALUES (s.description, s.price, s.store_price)";
+    	$q = "begin insert_product(:cdesc, :cprice, :cstore_price); end;";
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':cdesc', $desc);
     	oci_bind_by_name($stid, ':cprice', $price);
@@ -165,16 +163,18 @@ class Products {
     	$result = $db->createQuery($q);
     	$old_quantity = $result[0]['QUANTITY'];
     	$new_quantity = $old_quantity - $quantity;
-    	$q = "UPDATE inventory SET quantity = :cquantity WHERE p_id = :cp_id";
-    	$stid = $db->parseQuery($q);
-    	oci_bind_by_name($stid, ':cquantity', $new_quantity);
-    	oci_bind_by_name($stid, ':cp_id', $p_id);
+    	$q = "begin update_quantity(:cp_id, :cquantity); end;";
+		$stid = $db->parseQuery($q);
+		oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
+		oci_bind_by_name($stid, ':cquantity', $new_quantity);
     	oci_execute($stid);  // executes and commits
     	
     	// if new_quantity < 10 -> Make an order to store -> Add Balance move
-    	if($new_quantity < 10) {
-    		Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], 10, $result[0]['STORE_PRICE'], 'Debit', $db);
-    	} 
+    	if($new_quantity < 10 && $new_quantity >= 0) {
+    		Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], ($new_quantity + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
+    	} elseif($new_quantity < 0) { // Ordered more than in Inventory
+			Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], ($new_quantity*-1 + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
+		}
     }
     
     /**

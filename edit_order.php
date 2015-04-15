@@ -274,7 +274,7 @@ function addProduct()
 
 function increase(index, max_quantity)
 {
- 	if(document.getElementById("quantity_"+index).innerHTML >= max_quantity) return;
+ 	//if(document.getElementById("quantity_"+index).innerHTML >= max_quantity) return;
 
  	// Increase the quantity
 	document.getElementById("quantity_"+index).innerHTML++; 

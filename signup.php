@@ -11,8 +11,6 @@ require_once 'database/User.php';
 
 $err='';
 
-debug($_SESSION['string']);
-
 //check if postback
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $err = User::testSignUp();

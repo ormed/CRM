@@ -37,7 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php                             
+                                        <?php         
+                                        if(count($results) > 0)                    
                                         foreach ($results as $result) {
                                         ?>                 
                                     		<tr>

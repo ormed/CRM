@@ -6,7 +6,7 @@ include_once 'database/Customer.php';
 include_once 'database/Balance.php';
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-	Invoice::deleteInvoice($_POST['invoice_id']);
+	//Invoice::deleteInvoice($_POST['invoice_id']);
 }
 ?>
 
@@ -44,7 +44,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             	<form role="form" id="edit-order-form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
 	            	<input type="button" class="btn btn-info" value="Edit" onClick='parent.location="invoice.php?invoice_id=<?php echo $invoice['INVOICE_ID']?>"'/>
 	            	<input type="hidden" name="invoice_id" value="<?php echo $invoice['INVOICE_ID'] ?>"/>
-	            	<input type="submit" class="btn btn-danger" value="Delete" onClick=""/>
+	            	<!-- <input type="submit" class="btn btn-danger" value="Delete" onClick=""/>-->
 	            </form>
             </div>
             <br>

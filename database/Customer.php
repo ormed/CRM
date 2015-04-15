@@ -58,6 +58,8 @@ class Customer {
     		$q = "select * from customers where Initcap(first_name) like Initcap('{$first_name}') and Initcap(last_name) like Initcap('{$last_name}')";
     	} elseif(!empty($cust_id) && !empty($first_name) && !empty($last_name)) { // Inserted all
     		$q = "select * from customers where cust_id='{$cust_id}' or (Initcap(first_name) like Initcap('{$first_name}') and Initcap(last_name) like Initcap('{$last_name}'))";
+    	} else { // Nothing inserted
+    		return FALSE;
     	}
     	$result = $db->createQuery($q);
     	return $result;
@@ -68,7 +70,7 @@ class Customer {
      */
     public static function insertCustomer($first_name, $last_name) {
         $db = new Database();
-        $q = "insert into customers(FIRST_NAME, LAST_NAME) values (:cfirst_name, :clast_name)";
+        $q = "begin insert_customer(:cfirst_name, :clast_name); end;";
         $stid = $db->parseQuery($q);
         oci_bind_by_name($stid, ':cfirst_name', $first_name);
         oci_bind_by_name($stid, ':clast_name', $last_name);

@@ -53,23 +53,38 @@ class Invoice {
     	$invoice_id = $_POST['invoice_id'];
     	$i = 0;
     	while(isset($_POST['quantity_'.$i])) {
-    		if($_POST['quantity_'.$i] == 0) {
-    			// Delete row
-    			$q = "delete from invoice_rows where (invoice_id = :cinvoice_id and p_id = :cp_id)";
-    			$stid = $db->parseQuery($q);
-    			oci_bind_by_name($stid, ':cinvoice_id', $invoice_id);
-    			oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
-    			oci_execute($stid); // delete row
-    		} else {
-	    		// Update quantity
-	    		$q = "update invoice_rows set quantity = :cquantity where (p_id = :cp_id and invoice_id = :cinvoice_id)";
-	    		$stid = $db->parseQuery($q);
-	    		oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
-	    		oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
-	    		oci_bind_by_name($stid, ':cinvoice_id', $invoice_id);
-	    		oci_execute($stid);  // executes and commits
-    		}
+    		$old_quantity = Invoice::getQuantity($invoice_id, $_POST['p_id_'.$i], $db);
+    		
+	    	// Update quantity
+	    	$q = "update invoice_rows_view_copy set quantity = :cquantity where (p_id = :cp_id and invoice_id = :cinvoice_id)";
+	    	$stid = $db->parseQuery($q);
+	    	oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
+	    	oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
+	    	oci_bind_by_name($stid, ':cinvoice_id', $invoice_id);
+	    	oci_execute($stid);  // executes and commits
+	    	
+	    	// Check if the customer has returned items
+	    	if($_POST['quantity_'.$i] < $old_quantity) { 
+	    		$returned_quantity = $old_quantity - $_POST['quantity_'.$i];
+	    		$price = Products::getProductPrice($_POST['p_id_'.$i]);
+	    		
+	    		// Add returned items to Inventory
+	    		Inventory::increaseQuantity($_POST['p_id_'.$i], $returned_quantity, $db);
+	    		
+	    		// Make Debit for the returned items
+	    		Balance::insertBalanceWithParameters($_POST['p_id_'.$i], $_SESSION['id'], $returned_quantity, $price, 'Debit', $db);
+	    	}
     		$i++;
+    	}
+    }
+    
+    public static function getQuantity($invoice_id, $p_id, $db) {
+    	$q = "select quantity from invoice_rows where invoice_id = '{$invoice_id}' and p_id = '{$p_id}'";
+    	$result = $db->createQuery($q);
+    	if (count($result) > 0) {
+    		return $result[0]['QUANTITY'];
+    	} else {
+    		return FALSE;
     	}
     }
     
@@ -84,6 +99,11 @@ class Invoice {
     	foreach ($results as $result) {
     		Balance::insertBalanceWithParameters($result['P_ID'], $_SESSION['id'], $result['QUANTITY'], $result['PRICE'], 'Debit', $db);
     	}
+    	
+    	// Create a credit invoice header and rows for the current invoice_id
+    	$header = Invoice::getInvoiceHeader($invoice_id);
+    	Invoice::creditInvoice($header[0], $results, $db);
+    	
     	// Delete all rows
     	$q = "delete from invoice_rows where (invoice_id = :cinvoice_id)";
     	$stid = $db->parseQuery($q);
@@ -95,6 +115,29 @@ class Invoice {
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':cinvoice_id', $invoice_id);
     	oci_execute($stid); // delete header
+    }
+    
+    public static function creditInvoice($header, $rows, $db) {
+		$q = "insert into invoice_header(order_id, order_date, cust_id) values (:corder_id, :corder_date, :ccust_id)";
+		$stid = $db->parseQuery($q);
+		oci_bind_by_name($stid, ':corder_id', $invoice_id);
+		oci_bind_by_name($stid, ':corder_date', $header[]);
+		oci_bind_by_name($stid, ':ccust_id', $header['CUST_ID']);
+		oci_execute($stid); // insert header
+
+		// Insert invoice rows
+		$invoice_id = Invoice::getInvoiceId($order_id);
+		$results = Order::getOrderRows($order_id, $db);
+		foreach ($rows as $index=>$row) {
+			$q = "insert into invoice_rows(invoice_id, row_num, p_id, quantity) values (:cinvoice_id, :crow_num, :cp_id, :cquantity)";
+			$stid = $db->parseQuery($q);
+			oci_bind_by_name($stid, ':cinvoice_id', $invoice_id);
+			$row_num = $index + 1;
+			oci_bind_by_name($stid, ':crow_num', $row_num);
+			oci_bind_by_name($stid, ':cp_id', $row['P_ID']);
+			oci_bind_by_name($stid, ':cquantity', $row['QUANTITY']);
+			oci_execute($stid);  // executes and commits
+		}
     }
     
     /**
@@ -117,7 +160,7 @@ class Invoice {
      * Get all the invoices headers
      */
     public static function getInvoicesHeaders($db) {
-    	$q = "select * from invoice_header order by order_id";
+    	$q = "select * from invoice_header order by order_id DESC";
     	$result = $db->createQuery($q);
     	return $result;
     }
@@ -135,46 +178,6 @@ class Invoice {
     		return FALSE;
     	}
     }
-    
-//     /**
-//      * Search the invoice details depend on the input params
-//      * @param int $invoice_id
-//      * @param int $cust_id
-//      * @param int $order_id
-//      * @param String $start_date
-//      * @param String $end_date
-//      * @return Array of invoices
-//      */
-//     public static function getInvoiceDetails($invoice_id, $cust_id, $order_id, $start_date, $end_date, $first_name, $last_name) {
-//     	$db = new Database();
-//     	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name);
-
-//     	if(count($customers) > 0) {
-// 	    	$cust_ids = "";
-// 	    	foreach ($customers as $index=>$customer) {
-// 	    		$cust_ids .= ($customer['CUST_ID'].',');
-// 	    	}
-// 	    	$cust_ids[strlen($cust_ids)-1] = "";
-//     	} else {
-//     		$cust_ids = "NULL";
-//     	}
-    	
-//     	// Get the right date format to insert
-//     	$start = date("d/m/Y", strtotime($start_date));
-//     	$end = date("d/m/Y", strtotime($end_date));
-    	
-// 	    $q = "select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.invoice_id='{$invoice_id}' 
-// 		    UNION
-// 		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.cust_id='{$cust_id}'
-// 		    UNION
-// 		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.order_id='{$order_id}'
-// 		    UNION
-// 		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.order_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy')
-// 		    UNION
-// 		    select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where  i.cust_id=c.cust_id and i.cust_id IN ({$cust_ids})";
-// 	    $results = $db->createQuery($q);
-// 	    return $results;
-//     }
 
     /**
      * Search the invoice details depend on the input params
@@ -188,8 +191,9 @@ class Invoice {
     public static function getInvoiceDetails($invoice_id, $cust_id, $order_id, $start_date, $end_date, $first_name, $last_name) {
     	$db = new Database();
     	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name, $db);
-    
-    	if(count($customers) > 0) {
+    	if(!$customers) { // No input about customers has inserted
+    		$cust_ids = "NULL";
+    	} elseif(count($customers) > 0) {
     		$cust_ids = "";
     		foreach ($customers as $index=>$customer) {
     			$cust_ids .= ($customer['CUST_ID'].',');
@@ -198,12 +202,22 @@ class Invoice {
     	} else {
     		$cust_ids = "NULL";
     	}
+    	
     	 
     	// Get the right date format to insert
-    	$start = date("d/m/Y", strtotime($start_date));
-    	$end = date("d/m/Y", strtotime($end_date));
-    	 
-    	$q = "select i.invoice_id, i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, c.first_name, c.last_name from invoice_header i, customers c where i.cust_id=c.cust_id and i.invoice_id='{$invoice_id}' and i.cust_id='{$cust_id}' and i.order_id='{$order_id}' and i.order_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy') and i.cust_id IN ({$cust_ids})"; 
+    	if(!empty($start_date)) {
+    		$start = date("d/m/Y", strtotime($start_date));
+    	} else {
+    		$start = "";
+    	}
+    	if(!empty($end_date)) {
+    		$end = date("d/m/Y", strtotime($end_date));
+    	} else {
+    		$end = "";
+    	}
+
+    	$q = "select i.invoice_id,i.order_id,to_char(i.order_date, 'DD/MM/YYYY') as order_date,i.cust_id, c.first_name, c.last_name from invoice_header i,customers c where i.cust_id=c.cust_id and (i.invoice_id='{$invoice_id}' or i.order_id='{$order_id}' or (i.order_date >= to_date('{$start}','dd/mm/yyyy')) or (i.order_date <= to_date('{$end}','dd/mm/yyyy')) or i.cust_id IN ({$cust_ids}))";
+    	debug($q);
     	$results = $db->createQuery($q);
     	return $results;
     }

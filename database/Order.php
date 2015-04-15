@@ -36,12 +36,10 @@ class Order {
     public static function insertNewOrder() {
     	$db = new Database();
 
-    	$total_price = 0;
     	$headerResult = Order::insertHeader($db);
     	if($headerResult) { // Added new header
     		$order_id = Order::getLastAdded($db)[0]['LAST'];
     		$i = 1;
-    		debug($_POST);
     		while(isset($_POST['desc'.$i])) { // Insert new rows to the new header
     			$price = explode(",",$_POST['desc'.$i])[1];
     			$_POST['desc'.$i] = explode(",",$_POST['desc'.$i])[0];
@@ -65,6 +63,7 @@ class Order {
      * Create new order header
      */
     public static function insertHeader($db) {
+    	
     	$q = "insert into orders_header(ORDER_DATE, CUST_ID, STATUS) values (to_date(:corder_date, 'dd/mm/yyyy'), :ccust_id, :cstatus)";
         $stid = $db->parseQuery($q);
         // Get the right date format to insert
@@ -83,7 +82,7 @@ class Order {
      * Make status -> 'Close'
      */
     public static function closeOrder($order_id, $db) {
-    	$q = "update orders_header set status= 'Close' where order_id= :corder_id";
+    	$q = "begin update_status(:corder_id, 'Close'); end;";
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':corder_id', $order_id);
     	oci_execute($stid);  // executes and commits
@@ -94,7 +93,7 @@ class Order {
      * @param $index - the row num
      */
     public static function insertRow($index, $order_id, $p_id, $quantity, $db) {
-    	$q = "insert into orders_rows(ORDER_ID, ROW_NUM, P_ID, QUANTITY) values (:corder_id, :crow_num, :cp_id, :cquantity)";
+    	$q = "begin insert_order_row(:corder_id, :crow_num, :cp_id, :cquantity); end;";
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':corder_id', $order_id);
     	oci_bind_by_name($stid, ':crow_num', $index);
@@ -119,11 +118,12 @@ class Order {
     public static function editOrder() {
     	$db = new Database();
     	// Update Header
-    	$q = "update orders_header set status= :cstatus where order_id= :corder_id";
+    	$q = "begin update_status(:corder_id, :cstatus); end;";
     	$stid = $db->parseQuery($q);
-    	oci_bind_by_name($stid, ':cstatus', $_POST['status']);
     	oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
+    	oci_bind_by_name($stid, ':cstatus', $_POST['status']);
     	oci_execute($stid);  // executes and commits
+    	
     	// Update Rows
     	$i = 0;
     	while(isset($_POST['quantity_'.$i])) {
@@ -136,13 +136,13 @@ class Order {
     		if(count($product_row) > 0) { // Exist product
     			$row_num = $product_row[0]['ROW_NUM'];
     			if($_POST['quantity_'.$i] == 0) { // Delete row
-    				$q = "delete from orders_rows where (order_id = :corder_id and row_num = :crow_num)";
+    				$q = "begin delete_order_row(:corder_id, :crow_num, :cquantity); end;";
     				$stid = $db->parseQuery($q);
     				oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
     				oci_bind_by_name($stid, ':crow_num', $row_num);
     				oci_execute($stid); // delete row
     			} else { // Update quantity
-    				$q = "update orders_rows set quantity = :cquantity where (row_num = :crow_num and order_id = :corder_id)";
+    				$q = "begin update_order_row_quantity(:corder_id, :crow_num, :cquantity); end;";
     				$stid = $db->parseQuery($q);
     				oci_bind_by_name($stid, ':cquantity', $_POST['quantity_'.$i]);
     				oci_bind_by_name($stid, ':crow_num', $row_num);
@@ -150,7 +150,7 @@ class Order {
     				oci_execute($stid);  // executes and commits
     			}
     		} else { // Doesn't exist - create row
-    			$q = "insert into orders_rows(ORDER_ID, ROW_NUM, P_ID, QUANTITY) values (:corder_id, :crow_num, :cp_id, :cquantity)";
+    			$q = "begin insert_order_row(:corder_id, :crow_num, :cp_id, :cquantity); end;";
     			$stid = $db->parseQuery($q);
     			oci_bind_by_name($stid, ':corder_id', $_POST['order_id']);
     			$new_row = $last_row + 1;
@@ -227,27 +227,34 @@ class Order {
     	
     	$customers = Customer::getCustomersDetails($cust_id, $first_name, $last_name, $db);
 
-    	if(count($customers) > 0) {
+    	if(!$customers) {
+    		$cust_ids = "NULL";
+    	} else {
     		$cust_ids = "";
     		foreach ($customers as $index=>$customer) {
     			$cust_ids .= ($customer['CUST_ID'].',');
     		}
     		$cust_ids[strlen($cust_ids)-1] = "";
-    	} else {
-    		$cust_ids = "NULL";
     	}
     	
     	// Get the right date format to insert
-    	$start = date("d/m/Y", strtotime($start_date));
-    	$end = date("d/m/Y", strtotime($end_date));
+    	if(!empty($start_date)) {
+    		$start = date("d/m/Y", strtotime($start_date));
+    	} else {
+    		$start = NULL;
+    	}
+    	if(!empty($end_date)) {
+    		$end = date("d/m/Y", strtotime($end_date));
+    	} else {
+    		$end = NULL;
+    	}
     	 
     	$q = "select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and i.order_id='{$order_id}'
 	    	UNION
-	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and i.cust_id='{$cust_id}'
-	    	UNION
-	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and i.order_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy')
+	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and (i.order_date >= to_date('{$start}', 'dd/mm/yyyy') or i.order_date <= to_date('{$end}', 'dd/mm/yyyy'))
 	    	UNION
 	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where  i.cust_id=c.cust_id and i.cust_id IN ({$cust_ids})";
+    	debug($q);
     	$results = $db->createQuery($q);
     	return $results;
     }
@@ -282,7 +289,7 @@ class Order {
      * @return array of headers
      */
     public static function getOrdersHeader($db) {
-    	$q = "select * from orders_header order by order_id";
+    	$q = "select * from orders_header order by order_id DESC";
     	$result = $db->createQuery($q);
     	return $result;
     }
