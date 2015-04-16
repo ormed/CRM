@@ -48,6 +48,27 @@ class Balance {
     	oci_bind_by_name($stid, ':cessence', $essence);
     	oci_execute($stid);  // executes and commits
     }
+    
+    /**
+     * Add new Balance move
+     * @param Date $move_date
+     * @param int $p_id
+     * @param int $quantity
+     * @param double $price
+     * @param String(Credit/Debit) $essence
+     * @param Database $db
+     */
+    public static function insertBalanceWithAllParameters($move_date, $p_id, $user_id, $quantity, $price, $essence, $db) {
+    	$q = "begin insert_balance(to_date(:cmove_date, 'dd/mm/yyyy'), :cuser_id, :cp_id, :cquantity, :cprice, :cessence); end;";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':cmove_date', $move_date);
+    	oci_bind_by_name($stid, ':cuser_id', $user_id);
+    	oci_bind_by_name($stid, ':cp_id', $p_id);
+    	oci_bind_by_name($stid, ':cquantity', $quantity);
+    	oci_bind_by_name($stid, ':cprice', $price);
+    	oci_bind_by_name($stid, ':cessence', $essence);
+    	oci_execute($stid);  // executes and commits
+    }
 
     public static function deleteBalance($move_id) {
     	$db = new Database();
@@ -66,10 +87,18 @@ class Balance {
     
     public static function getAllBalanceByDate($start, $end, $db) {
     	// Get the right date format to insert
-    	$start = date("d/m/Y", strtotime($start));
-    	$end = date("d/m/Y", strtotime($end));
+    	if(!empty($start)) {
+    		$start = date("d/m/Y", strtotime($start));
+    	} else {
+    		$start = "";
+    	}
+    	if(!empty($end)) {
+    		$end = date("d/m/Y", strtotime($end));
+    	} else {
+    		$end = "";
+    	}
     	
-    	$q = "select * from balance where move_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy') order by move_date, move_id";
+    	$q = "select move_id, TO_CHAR(MOVE_DATE, 'dd/mm/yyyy') as MOVE_DATE, p_id, quantity, essence, price, user_id from balance where move_date between to_date('{$start}', 'dd/mm/yyyy') and to_date('{$end}', 'dd/mm/yyyy') order by move_date, move_id";
     	$result = $db->createQuery($q);
     	return $result;
     }
@@ -101,10 +130,18 @@ class Balance {
      */
     public static function getTotalBalanceByDate($start, $end, $move_id, $db) {
     	// Get the right date format to insert
-    	$start = date("d/m/Y", strtotime($start));
-    	$end = date("d/m/Y", strtotime($end));
+    if(!empty($start)) {
+    		$start = date("d/m/Y", strtotime($start));
+    	} else {
+    		$start = '';
+    	}
+    	if(!empty($end)) {
+    		$end = date("d/m/Y", strtotime($end));  		
+    	} else {
+    		$end = '';
+    	}
     	
-    	$q = "SELECT get_total_balance_by_date('{$move_id}', '{$start}', '{$end}') AS total FROM dual";
+    	$q = "SELECT get_balance_by_date('{$move_id}', to_date('{$start}', 'dd/mm/yyyy'), to_date('{$end}', 'dd/mm/yyyy')) AS total FROM dual";
     	$result = $db->createQuery($q);
     	return $result;
     }

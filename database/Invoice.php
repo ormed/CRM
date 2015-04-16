@@ -316,4 +316,10 @@ class Invoice {
     	}
     	return $total[0]['TOTAL'];
     }
+    
+    public static function getInvoiceCount($db) {
+    	$q = "select count(*) as count from invoice_header";
+    	$result = $db->createQuery($q);
+    	return $result[0]['COUNT'];
+    }
 }

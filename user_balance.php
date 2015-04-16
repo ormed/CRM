@@ -21,17 +21,24 @@ include_once 'database/User.php';
 		<div id="page-wrapper">
 
 			<div class="container-fluid">
-			
-			
 				<div class="row">
 					<div class="col-lg-12">
-						<h1 class="page-header"><?php echo (strtoupper($_SESSION['user']));?> Balance</h1>
+						<h1 class="page-header"><?php echo ($_SESSION['user']);?> Balance</h1>
 					</div>
 					<!-- /.col-lg-12 -->
 				</div>
 				<!-- /.row -->
 				
-				<div align="center" id="chart_div" style="width:100%; height:50%;">
+				
+				
+				<div class="panel panel-default" style="display: none;" id="graph">
+                        <div class="panel-heading">
+                           	<i class="fa fa-line-chart"></i> Balance Graph
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+							<div align="center" id="chart_div" style="width:100%; height:50%;"></div>
+						</div>
 				</div>
 				
 				<input type="button" id='graph_button' class="btn btn-info" value="Show Graph" onClick='drawBasic(<?php echo count($results);?>)'/>
@@ -107,9 +114,11 @@ include_once 'database/User.php';
            				if(button.value == 'Show Graph') {
                				button.value = 'Hide Graph';
                				document.getElementById('chart_div').style.display='block';
+               				document.getElementById('graph').style.display='block';
            				} else {
            					button.value = 'Show Graph';
            					document.getElementById('chart_div').style.display='none';
+           					document.getElementById('graph').style.display='none';
            					return;
            				}
        				      var data = new google.visualization.DataTable();

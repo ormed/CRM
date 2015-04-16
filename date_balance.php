@@ -4,7 +4,14 @@ include_once 'parts/header.php';
 include_once 'database/Balance.php';
 include_once 'database/User.php';
 
+$err = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+	if(empty($_POST['start_date']) || empty($_POST['end_date'])) {
+		$err = "Please fill in all the fields";
+	}
+}
+
+if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
 	include_once 'parts/body_header.php';
 	?>
 	<div class="row">
@@ -49,6 +56,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         	$description = Products::getProductDesc($result['P_ID'], $db);
                                         	$price = $result['PRICE'];
                                         	$balance = Balance::getTotalBalanceByDate($start_date, $end_date, $result['MOVE_ID'], $db);
+                                        	
+                                        	
                                         	?>                 
                                     		<tr>
 												<td><?php echo($result['MOVE_ID']); ?></td>
@@ -97,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 			
 				<div class="row">
 					<div class="col-lg-12">
-						<h1 class="page-header">Search Products</h1>
+						<h1 class="page-header">Balance By Date</h1>
 					</div>
 					<!-- /.col-lg-12 -->
 				</div>
@@ -105,11 +114,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 				<!-- /.row -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Search
+                            Dates
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                         	<form role="form" method="POST" action=<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>>
+                        		<?php if(!empty($err)) { ?>
+                                    	<div class="alert alert-danger" role="alert">
+                                    	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                                    		<?php echo $err?>
+                                    	</div> 
+                                    	<?php }?>
+                                    	
 	                        	<div class="form-group">
 	                            	<i class="fa fa-caret-right"></i> <label>Start Date</label>
 	                            	<input class="form-control" name="start_date" style="width:200px" type="date" value=<?php echo date("Y-m-d")?>/>

@@ -107,4 +107,14 @@ class Customer {
     	return $result;
     }
     
+    /**
+     * Get the total customers number
+     * @param Database $db
+     */
+    public static function getCustomersCount($db) {
+    	$q = "select count(*) as count from customers";
+    	$result = $db->createQuery($q);
+    	return $result[0]['COUNT'];
+    }
+    
 }

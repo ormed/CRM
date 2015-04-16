@@ -99,7 +99,7 @@ include_once 'parts/header.php';?>
                                         		<div>
                                             		<i class="fa fa-cubes"></i> <label>Quantity</label>
                                             		<input class="form-control" id='quantity1' name="quantity1" style="width:200px" placeholder='Quantity' maxlength="5" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                                            		<label>Max:</label> <input class="form-control" id='max_quantity1' style="width:200px" placeholder='Max Quantity' value='<?php echo ($results[0]['QUANTITY']);?>' disabled>
+                                            		<label>In Store:</label> <input class="form-control" id='max_quantity1' style="width:200px" placeholder='Max Quantity' value='<?php echo ($results[0]['QUANTITY']);?>' disabled>
                                       			</div>
                                         		
                                         		<div id="more-items"></div>

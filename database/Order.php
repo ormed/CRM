@@ -46,6 +46,7 @@ class Order {
     			$p_id = Products::getProductId($_POST['desc'.$i]);
      			$rowResult = Order::insertRow($i, $order_id, $p_id, $_POST['quantity'.$i], $db);
      			if(strcmp($_POST['status'], 'Close') == 0) { // Add to Balance if Closed order
+     				
      				Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], $_POST['quantity'.$i], $price,'Credit', $db);
      				Products::reduceQuantity($p_id, $_POST['quantity'.$i], $db);
      			}
@@ -301,5 +302,11 @@ class Order {
     	$q = "select * from orders_header where status='Open' order by order_id";
     	$result = $db->createQuery($q);
     	return $result;
+    }
+    
+    public static function getOrdersCount($db) {
+    	$q = "select count(*) as count from orders_header where status LIKE 'Open'";
+    	$result = $db->createQuery($q);
+    	return $result[0]['COUNT'];
     }
 }

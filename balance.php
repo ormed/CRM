@@ -30,7 +30,14 @@ include_once 'database/User.php';
 				</div>
 				<!-- /.row -->
 				
-				<div align="center" id="chart_div" style="width:100%; height:50%;">
+				<div class="panel panel-default" style="display: none;" id="graph">
+                        <div class="panel-heading">
+                           	<i class="fa fa-line-chart"></i> Balance Graph
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+							<div align="center" id="chart_div" style="width:100%; height:50%;"></div>
+						</div>
 				</div>
 				
 				<input type="button" id='graph_button' class="btn btn-info" value="Show Graph" onClick='drawBasic(<?php echo count($results);?>)'/>
@@ -103,14 +110,16 @@ include_once 'database/User.php';
        				google.load('visualization', '1', {packages: ['corechart', 'line']});
        				//google.setOnLoadCallback(drawBasic);
 
-       				function drawBasic(total) {		
+       				function drawBasic(total) {	
            				var button = document.getElementById("graph_button");
            				if(button.value == 'Show Graph') {
                				button.value = 'Hide Graph';
                				document.getElementById('chart_div').style.display='block';
+           					document.getElementById("graph").style.display='block';
            				} else {
            					button.value = 'Show Graph';
            					document.getElementById('chart_div').style.display='none';
+           					document.getElementById('graph').style.display='none';
            					return;
            				}
        				      var data = new google.visualization.DataTable();
