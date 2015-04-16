@@ -71,6 +71,9 @@
                                 <li>
                                     <a href="all_customers.php">Customers</a>
                                 </li>
+                                <li>
+                                    <a href="credit_debit.php">Credit vs Debit</a>
+                                </li>
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>

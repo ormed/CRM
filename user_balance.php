@@ -45,7 +45,7 @@ include_once 'database/User.php';
 
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Moves
+                            <i class="fa fa-sort-amount-desc"></i> Moves
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">

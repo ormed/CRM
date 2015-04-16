@@ -121,6 +121,18 @@ class Balance {
     	return $result;
     }
     
+    public static function getTotalCredit($db) {
+    	$q = "select get_total_credit as total_credit from dual";
+    	$result = $db->createQuery($q);
+    	return $result;
+    }
+    
+    public static function getTotalDebit($db) {
+    	$q = "select get_total_debit as total_debit from dual";
+    	$result = $db->createQuery($q);
+    	return $result;
+    }
+    
     
     /**
      * Get Balance by start and end dates

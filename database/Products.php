@@ -165,13 +165,13 @@ class Products {
     	$new_quantity = $old_quantity - $quantity;
     	$q = "begin update_quantity(:cp_id, :cquantity); end;";
 		$stid = $db->parseQuery($q);
-		oci_bind_by_name($stid, ':cp_id', $_POST['p_id_'.$i]);
+		oci_bind_by_name($stid, ':cp_id', $p_id);
 		oci_bind_by_name($stid, ':cquantity', $new_quantity);
     	oci_execute($stid);  // executes and commits
     	
     	// if new_quantity < 10 -> Make an order to store -> Add Balance move
     	if($new_quantity < 10 && $new_quantity >= 0) {
-    		Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], ($new_quantity + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
+    		Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], (10), $result[0]['STORE_PRICE'], 'Debit', $db);
     	} elseif($new_quantity < 0) { // Ordered more than in Inventory
 			Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], ($new_quantity*-1 + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
 		}

@@ -13,6 +13,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
 	include_once 'parts/body_header.php';
+	
+	$db = new Database();
+	$start_date = $_POST['start_date'];
+	$end_date = $_POST['end_date'];
+	$results = Balance::getAllBalanceByDate($start_date, $end_date, $db);
+	
 	?>
 	<div class="row">
 					<div class="col-lg-12">
@@ -23,9 +29,23 @@ if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
 				</div>
 				</br>
 				<!-- /.row -->
+				
+				<div class="panel panel-default" style="display: none;" id="graph">
+                        <div class="panel-heading">
+                           	<i class="fa fa-line-chart"></i> Balance Graph
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+							<div align="center" id="chart_div" style="width:100%; height:50%;"></div>
+						</div>
+				</div>
+				
+				<input type="button" id='graph_button' class="btn btn-info" value="Show Graph" onClick='drawBasic(<?php echo count($results);?>)'/>
+				
+				
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Moves
+                            <i class="fa fa-sort-amount-desc"></i> Moves
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -46,19 +66,16 @@ if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
                                     </thead>
                                     <tbody>
                                         <?php 
-                                        $db = new Database();
-                                        $start_date = $_POST['start_date'];
-                                        $end_date = $_POST['end_date'];
-                                        $results = Balance::getAllBalanceByDate($start_date, $end_date, $db);
                                         foreach ($results as $index=>$result) {
                                         	$move_date = Balance::getBalanceDate($result['MOVE_ID'], $db);
                                         	$username = User::getUsername($result['USER_ID']);
                                         	$description = Products::getProductDesc($result['P_ID'], $db);
                                         	$price = $result['PRICE'];
                                         	$balance = Balance::getTotalBalanceByDate($start_date, $end_date, $result['MOVE_ID'], $db);
-                                        	
-                                        	
                                         	?>                 
+                                        	<input type="hidden" id='hidden_balance_<?php echo $index?>' value='<?php echo $balance[0]['TOTAL']?>'/>
+											<input type="hidden" id='hidden_date_<?php echo $index?>' value='<?php echo($move_date[0]['MOVE_DATE'])?>'/>
+												
                                     		<tr>
 												<td><?php echo($result['MOVE_ID']); ?></td>
 												<td><?php echo ($username); ?></td>
@@ -86,6 +103,52 @@ if (($_SERVER["REQUEST_METHOD"] == "POST") && (empty($err))) {
                         <!-- /.panel-body -->
                     </div>
                     <!-- /.panel -->
+                    
+                    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1.1','packages':['corechart']}]}"></script>
+       				
+       				<script type="text/javascript">
+       				google.load('visualization', '1', {packages: ['corechart', 'line']});
+       				//google.setOnLoadCallback(drawBasic);
+
+       				function drawBasic(total) {		
+           				var button = document.getElementById("graph_button");
+           				if(button.value == 'Show Graph') {
+               				button.value = 'Hide Graph';
+               				document.getElementById('chart_div').style.display='block';
+               				document.getElementById('graph').style.display='block';
+           				} else {
+           					button.value = 'Show Graph';
+           					document.getElementById('chart_div').style.display='none';
+           					document.getElementById('graph').style.display='none';
+           					return;
+           				}
+       				      var data = new google.visualization.DataTable();
+       				      data.addColumn('string', 'X');
+       				      data.addColumn('number', 'Balance');
+
+       				      var balance_value;
+       				      var balance_date;
+       				      var i;
+       				      for(i = 0; i < total; i++) {
+           				      balance_value = document.getElementById("hidden_balance_"+i).value;
+           				  	  balance_date = document.getElementById("hidden_date_"+i).value;
+           				      data.addRow([balance_date, parseInt(balance_value)]);
+       				      }
+
+       				      var options = {
+       				        hAxis: {
+       				          title: 'Date'
+       				        },
+       				        vAxis: {
+       				          title: 'Balance'
+       				        }
+       				      };
+
+       				      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+       				      chart.draw(data, options);
+       				    }
+				    </script>
 	<?php 
 	
 	include_once 'parts/body_footer.php';

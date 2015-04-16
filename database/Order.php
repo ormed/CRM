@@ -46,8 +46,8 @@ class Order {
     			$p_id = Products::getProductId($_POST['desc'.$i]);
      			$rowResult = Order::insertRow($i, $order_id, $p_id, $_POST['quantity'.$i], $db);
      			if(strcmp($_POST['status'], 'Close') == 0) { // Add to Balance if Closed order
-     				
-     				Balance::insertBalanceWithParameters($p_id, $_SESSION['id'], $_POST['quantity'.$i], $price,'Credit', $db);
+     				$order_date = Order::getOrderDate($order_id, $db)[0]['ORDER_DATE'];
+     				Balance::insertBalanceWithAllParameters($order_date, $p_id, $_SESSION['id'], $_POST['quantity'.$i], $price,'Credit', $db);
      				Products::reduceQuantity($p_id, $_POST['quantity'.$i], $db);
      			}
     			$i++;
@@ -64,8 +64,7 @@ class Order {
      * Create new order header
      */
     public static function insertHeader($db) {
-    	
-    	$q = "insert into orders_header(ORDER_DATE, CUST_ID, STATUS) values (to_date(:corder_date, 'dd/mm/yyyy'), :ccust_id, :cstatus)";
+    	$q = "begin insert_order_header(to_date(:corder_date, 'dd/mm/yyyy'), :ccust_id, :cstatus); end;";
         $stid = $db->parseQuery($q);
         // Get the right date format to insert
         $formatDate = date("d/m/Y", strtotime($_POST['order-date']));
@@ -108,7 +107,8 @@ class Order {
      * Get the last record added 
      */
     public static function getLastAdded($db) {
-    	$q = "select max(order_id) as last from orders_header";
+    	$q = "select get_last_order as last from dual";
+    	//$q = "select max(order_id) as last from orders_header";
     	$result = $db->createQuery($q);
     	return $result;
     }

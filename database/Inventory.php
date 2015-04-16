@@ -43,7 +43,7 @@ class Inventory {
 			// if new_quantity < 10 -> Make an order to store -> Add Balance move
 			if($new_quantity < 10 && $new_quantity >= 0) {
 				$result = Products::getProductById($_POST['p_id_'.$i]);
-				Balance::insertBalanceWithParameters($_POST['p_id_'.$i], $_SESSION['id'], ($new_quantity + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
+				Balance::insertBalanceWithParameters($_POST['p_id_'.$i], $_SESSION['id'], (10), $result[0]['STORE_PRICE'], 'Debit', $db);
 			} elseif($new_quantity < 0) { // Ordered more than in Inventory
 				$result = Products::getProductById($_POST['p_id_'.$i]);
 				Balance::insertBalanceWithParameters($_POST['p_id_'.$i], $_SESSION['id'], ($new_quantity*-1 + 10), $result[0]['STORE_PRICE'], 'Debit', $db);
