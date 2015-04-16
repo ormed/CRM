@@ -101,7 +101,7 @@ class Invoice {
     	}
     	
     	// Create a credit invoice header and rows for the current invoice_id
-    	$header = Invoice::getInvoiceHeader($invoice_id);
+    	$header = Invoice::getInvoiceHeader($invoice_id, $db);
     	Invoice::creditInvoice($header[0], $results, $db);
     	
     	// Delete all rows
@@ -115,6 +115,66 @@ class Invoice {
     	$stid = $db->parseQuery($q);
     	oci_bind_by_name($stid, ':cinvoice_id', $invoice_id);
     	oci_execute($stid); // delete header
+    }
+    
+    public static function refund($invoice_id) {
+    	$db = new Database();
+    	// Add to Balance as Debit
+    	$results = Invoice::getInvoiceRows($invoice_id, $db);
+    	foreach ($results as $result) {
+    		Balance::insertBalanceWithParameters($result['P_ID'], $_SESSION['id'], $result['QUANTITY'], $result['PRICE'], 'Debit', $db);
+    	}
+    	 
+    	// Create a new invoice as a refund
+    	$header = Invoice::getInvoiceHeader($invoice_id, $db);
+    	Invoice::insertRefundedInvoice($header[0], $db);
+    	 
+    	// Make invoice unrefundable
+    	$q = "begin edit_refunded(:cinvoice_id, 'True'); end;";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':cinvoice_id', $invoice_id);
+    	oci_execute($stid);  // Make refunded-'True'
+    }
+    
+    public static function insertRefundedInvoice($header, $db) {
+    	// Create refunded header
+    	$order_id = $header['ORDER_ID'];
+    	$order_date = Order::getOrderDate($order_id, $db)[0]['ORDER_DATE'];
+    	$cust_id = $header['CUST_ID'];
+    	$refunded = 'None';
+    	$q = "begin insert_invoice_header(:corder_id, to_date(:corder_date, 'dd/mm/yyyy'), :ccust_id, :crefunded); end;";
+    	$stid = $db->parseQuery($q);
+    	oci_bind_by_name($stid, ':corder_id', $order_id);
+    	oci_bind_by_name($stid, ':corder_date', $order_date);
+    	oci_bind_by_name($stid, ':ccust_id', $cust_id);
+    	oci_bind_by_name($stid, ':crefunded', $refunded);
+    	oci_execute($stid);  // Create invoice header
+    	
+    	$refunded_id = Invoice::getLastAddedInvoiceId($db); // Get refunded id
+    	
+    	// Create refunded rows for the header
+    	$rows = Invoice::getInvoiceRows($header['INVOICE_ID'], $db);
+    	foreach ($rows as $index=>$row) {
+    		$q = "begin insert_invoice_row(:cinvoice_id, :crow_num, :cp_id, :cquantity); end;";
+    		$stid = $db->parseQuery($q);
+    		oci_bind_by_name($stid, ':cinvoice_id', $refunded_id);
+    		$row_num = $index + 1;
+    		oci_bind_by_name($stid, ':crow_num', $row_num);
+    		oci_bind_by_name($stid, ':cp_id', $row['P_ID']);
+    		$refund_quantity = -1*$row['QUANTITY'];
+    		oci_bind_by_name($stid, ':cquantity', $refund_quantity);
+    		oci_execute($stid);  // Insert refunded row
+    	}
+    }
+    
+    public static function getLastAddedInvoiceId($db) {
+    	$q = "select max(invoice_id) as last from invoice_header";
+    	$result = $db->createQuery($q);
+    	if (count($result) > 0) {
+    		return $result[0]['LAST'];
+    	} else {
+    		return FALSE;
+    	}
     }
     
     public static function creditInvoice($header, $rows, $db) {
@@ -160,7 +220,7 @@ class Invoice {
      * Get all the invoices headers
      */
     public static function getInvoicesHeaders($db) {
-    	$q = "select * from invoice_header order by order_id DESC";
+    	$q = "select * from invoice_header order by invoice_id DESC";
     	$result = $db->createQuery($q);
     	return $result;
     }
@@ -168,8 +228,7 @@ class Invoice {
     /**
      * Get the invoice header
      */
-    public static function getInvoiceHeader($invoice_id) {
-    	$db = new Database();
+    public static function getInvoiceHeader($invoice_id, $db) {
     	$q = "select * from invoice_header where invoice_id = '{$invoice_id}'";
     	$result = $db->createQuery($q);
     	if (count($result) > 0) {
@@ -217,7 +276,6 @@ class Invoice {
     	}
 
     	$q = "select i.invoice_id,i.order_id,to_char(i.order_date, 'DD/MM/YYYY') as order_date,i.cust_id, c.first_name, c.last_name from invoice_header i,customers c where i.cust_id=c.cust_id and (i.invoice_id='{$invoice_id}' or i.order_id='{$order_id}' or (i.order_date >= to_date('{$start}','dd/mm/yyyy')) or (i.order_date <= to_date('{$end}','dd/mm/yyyy')) or i.cust_id IN ({$cust_ids}))";
-    	debug($q);
     	$results = $db->createQuery($q);
     	return $results;
     }

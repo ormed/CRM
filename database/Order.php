@@ -254,7 +254,6 @@ class Order {
 	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where i.cust_id=c.cust_id and (i.order_date >= to_date('{$start}', 'dd/mm/yyyy') or i.order_date <= to_date('{$end}', 'dd/mm/yyyy'))
 	    	UNION
 	    	select i.order_id, to_char(i.order_date, 'DD/MM/YYYY') as order_date, i.cust_id, i.status, c.first_name, c.last_name from orders_header i, customers c where  i.cust_id=c.cust_id and i.cust_id IN ({$cust_ids})";
-    	debug($q);
     	$results = $db->createQuery($q);
     	return $results;
     }

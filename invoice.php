@@ -18,11 +18,12 @@ if (!isset($_GET['invoice_id'])) {
 
 $db = new Database();
 $invoice_id = $_GET['invoice_id'];
-$invoice = Invoice::getInvoiceHeader($invoice_id);
+$invoice = Invoice::getInvoiceHeader($invoice_id, $db);
 $rows = Invoice::getInvoiceRows($invoice_id, $db);
 $cust = Customer::getCustomerById($invoice[0]['CUST_ID'], $db);
 $invoice_date = Invoice::getInvoiceDate($invoice_id, $db);	
 $total = Invoice::getTotal($invoice_id, $db);
+$refunded = $invoice[0]['REFUNDED'];
 if (!$invoice) {
 	header("Location: all_invoices.php");
 }	
@@ -76,7 +77,11 @@ if (!$invoice) {
                    				<div class="panel panel-default height">
                        				<div class="panel-heading">Order Details</div>
                        				<div class="panel-body">
+                       				    <?php if(strcmp($refunded, 'False') != 0) { ?>
+                       				    <div><strong><u><font color="red">Refunded</font></u></strong></div>
+                       				    <?php } ?>
                            				<strong>Date:</strong> <?php echo $invoice_date[0]['ORDER_DATE']?>
+                           				
                                		</div>
                        				</div>
                    				</div>
@@ -110,7 +115,9 @@ if (!$invoice) {
                                 	?>
                                 <tr id="content_<?php echo $index?>">
                                     <td>
-                                    	<button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button> 
+                                    	<?php if(strcmp($refunded, 'False') == 0) { ?>
+                                    	<button type="button" class="btn btn-primary btn-xs" onclick="deleteItem(<?php echo $index?>);"><i class="fa fa-times"></i></button>
+                                    	<?php } ?> 
                                     	<?php echo $row['DESCRIPTION']?>
                                     	<input type="hidden" id='hidden_p_id_<?php echo $index?>' name='p_id_<?php echo $index?>' value='<?php echo $row['P_ID']?>'>
                                     </td>
@@ -118,7 +125,9 @@ if (!$invoice) {
                                     	$<?php echo $row['PRICE']?>
                                     </td>
                                     <td class="text-center">
+                                    	<?php if(strcmp($refunded, 'False') == 0) { ?>
                                     	<button type="button" onclick="decrease(<?php echo $index?>);" class="btn btn-danger btn-xs"><i class="fa fa-minus"></i></button>
+                                    	<?php } ?>
                                     	 <span id='quantity_<?php echo $index?>'><?php echo $row['QUANTITY']?></span> 
                                     	 <input type="hidden" id='hidden_quantity_<?php echo $index?>' name='quantity_<?php echo $index?>' value='<?php echo $row['QUANTITY']?>'>
                                    	</td>
@@ -144,8 +153,10 @@ if (!$invoice) {
             </div>
         </div>
     </div>
+    <?php if(strcmp($refunded, 'False') == 0) { ?>
     <button type="submit" class="btn btn-primary">Submit</button>
     <input type=button onClick="location.href='all_invoices.php'" class="btn btn-primary" value='Cancel'>
+    <?php } ?>
     <input type=button onClick="location.href='search_invoice.php'" class="btn btn-primary" value='Search'>
     
     

@@ -7,7 +7,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.php">CRM System</a>
+                <a class="navbar-brand" href="index.php"><i class="fa fa-credit-card"></i> CRM System | <font color="green" style="font-family: Cursive">Welcome <?php echo $_SESSION['user']?>!</font></a>
             </div>
             <!-- /.navbar-header -->
 
